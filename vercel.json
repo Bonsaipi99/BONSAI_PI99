@@ -1,7 +1,7 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
-  ],
+  ]
   "framework": "vite",
   "installCommand": "yarn install",
   "buildCommand": "yarn build",

@@ -1,50 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>BONSAI PI 99</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <style>
-        body { background-color: #002200; color: gold; text-align: center; font-family: sans-serif; padding-top: 100px; }
-        .btn { background: gold; padding: 20px; border-radius: 10px; font-weight: bold; cursor: pointer; color: black; display: inline-block; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>BONSAI PI 99</title>
+
+  <!-- ✅ BẮT BUỘC: Load Pi SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+  <style>
+    body {
+      background: #064e3b;
+      color: gold;
+      text-align: center;
+      font-family: sans-serif;
+      padding-top: 100px;
+    }
+    button {
+      background: gold;
+      color: black;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
 </head>
+
 <body>
-    <h1>🎰 BONSAI PI 99 🎰</h1>
-    <div id="status">Đang khởi tạo hệ thống...</div>
-    <br><br>
-    <div class="btn" onclick="napPi()">BẤM ĐỂ NẠP 10 PI</div>
+  <h1>🎰 BONSAI PI 99 🎰</h1>
+  <p id="status">Đang khởi tạo...</p>
 
-    <script>
-        // Tuyệt chiêu: Đợi SDK sẵn sàng mới cho chạy
-        window.onload = function() {
-            const Pi = window.Pi;
-            Pi.init({ version: "2.0", sandbox: false });
-            
-            document.getElementById('status').innerText = "Đang kết nối ví...";
+  <button onclick="napPi()">BẤM ĐỂ NẠP 10 PI</button>
 
-            Pi.authenticate(['username', 'payments'], function(payment) {})
-              .then(function(auth) {
-                document.getElementById('status').innerText = "Chào Nghệ nhân: " + auth.user.username;
-              })
-              .catch(function(err) {
-                document.getElementById('status').innerText = "Lỗi kết nối: " + err.message;
-              });
-        };
+  <script>
+    let Pi;
 
-        function napPi() {
-            if (!window.Pi) { alert("SDK chưa tải xong, đợi xíu Nhi ơi!"); return; }
-            
-            window.Pi.createPayment({
-                amount: 10,
-                memo: "Nap Pi vao song Bonsai",
-                metadata: { type: "deposit" },
-            }, {
-                onReadyForServerApproval: function(id) { console.log("Duyet: " + id); },
-                onReadyForServerCompletion: function(id, tx) { alert("Nạp thành công! Chúc Nhi trúng lớn!"); },
-                onCancel: function(id) { },
-                onError: function(err) { alert("Lỗi nạp: " + err.message); }
-            });
+    // 🚀 Khi load xong
+    window.onload = function () {
+
+      // ❌ Nếu không có SDK
+      if (!window.Pi) {
+        document.getElementById("status").innerText = "❌ Không load được Pi SDK";
+        return;
+      }
+
+      Pi = window.Pi;
+
+      // ✅ Init SDK
+      Pi.init({
+        version: "2.0",
+        sandbox: true   // 👉 test thì để true, live thì false
+      });
+
+      document.getElementById("status").innerText = "🔄 Đang kết nối Pi...";
+
+      // ✅ Login + quyền payment
+      Pi.authenticate(['username', 'payments'], function(payment) {})
+        .then(function(auth) {
+          document.getElementById("status").innerText =
+            "✅ Xin chào: " + auth.user.username;
+        })
+        .catch(function(err) {
+          document.getElementById("status").innerText =
+            "❌ Lỗi kết nối: " + err.message;
+        });
+    };
+
+    // 💰 Hàm thanh toán
+    function napPi() {
+
+      if (!Pi) {
+        alert("SDK chưa sẵn sàng");
+        return;
+      }
+
+      Pi.createPayment(
+        {
+          amount: 10,
+          memo: "Nạp Pi vào Bonsai",
+          metadata: { type: "nap_pi" }
+        },
+        {
+          onReadyForServerApproval: function(paymentId) {
+            console.log("🟡 Chờ duyệt: ", paymentId);
+          },
+
+          onReadyForServerCompletion: function(paymentId, txid) {
+            alert("✅ Nạp thành công!");
+            console.log("TXID:", txid);
+          },
+
+          onCancel: function(paymentId) {
+            alert("❌ Đã hủy");
+          },
+
+          onError: function(error) {
+            alert("❌ Lỗi: " + error.message);
+          }
         }
-    </script>
+      );
+    }
+  </script>
 </body>
 </html>

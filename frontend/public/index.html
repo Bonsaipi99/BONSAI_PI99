@@ -2,98 +2,75 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>BONSAI PI 99</title>
-
-  <!-- Pi SDK -->
+  <title>BONSAI PI 99 - CASINO</title>
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
   <style>
-    body {
-      background: #064e3b;
-      color: gold;
-      text-align: center;
-      font-family: sans-serif;
-      padding-top: 100px;
-    }
-    button {
-      background: gold;
-      color: black;
-      padding: 15px 25px;
-      border-radius: 10px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-    }
+    body { background: #064e3b; color: gold; text-align: center; font-family: sans-serif; padding-top: 100px; }
+    .card { border: 2px solid gold; display: inline-block; padding: 30px; border-radius: 15px; background: rgba(0,0,0,0.3); }
+    button { background: gold; color: black; padding: 15px 25px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-size: 18px; box-shadow: 0 4px #b8860b; }
+    button:active { transform: translateY(2px); box-shadow: 0 2px #b8860b; }
   </style>
 </head>
-
 <body>
-  <h1>🎰 BONSAI PI 99 🎰</h1>
-  <p id="status">Đang tải...</p>
-
-  <button onclick="napPi()">BẤM ĐỂ NẠP 10 PI</button>
+  <div class="card">
+    <h1>🎰 BONSAI PI 99 🎰</h1>
+    <p id="status">🔄 Đang khởi tạo hệ thống...</p>
+    <button onclick="napPi()">NẠP 10 PI VÀO SÒNG</button>
+  </div>
 
   <script>
-    var Pi = null;
+    const Pi = window.Pi;
 
     window.onload = function () {
-
       if (!window.Pi) {
-        document.getElementById("status").innerText = "❌ Không load được Pi SDK";
+        document.getElementById("status").innerText = "❌ Lỗi: Hãy mở bằng Pi Browser!";
         return;
       }
 
-      Pi = window.Pi;
-
       try {
-        // ✅ INIT (không dùng await)
-        Pi.init({ version: "2.0", sandbox: true });
+        // 🚨 QUAN TRỌNG: Đổi sandbox thành FALSE vì mầy đã lên Production
+        Pi.init({ version: "2.0", sandbox: false });
 
-        document.getElementById("status").innerText = "🔄 Đang đăng nhập...";
+        document.getElementById("status").innerText = "🔄 Đang kết nối ví nghệ nhân...";
 
-        // ✅ LOGIN
-        Pi.authenticate(['username', 'payments'], function(payment) {})
-          .then(function(auth) {
-            document.getElementById("status").innerText =
-              "✅ Xin chào: " + auth.user.username;
-          })
-          .catch(function(err) {
-            document.getElementById("status").innerText =
-              "❌ Lỗi: " + err.message;
-          });
-
+        // Tự động gọi đăng nhập ngay khi vào app
+        Pi.authenticate(['username', 'payments'], function(payment) {
+            // Hàm xử lý thanh toán dở dang nếu có
+        })
+        .then(function(auth) {
+            document.getElementById("status").innerText = "✅ Xin chào nghệ nhân: " + auth.user.username;
+        })
+        .catch(function(err) {
+            document.getElementById("status").innerText = "❌ Lỗi kết nối: " + err.message;
+        });
       } catch (e) {
-        document.getElementById("status").innerText =
-          "❌ Crash: " + e.message;
+        document.getElementById("status").innerText = "❌ Crash: " + e.message;
       }
     };
 
     function napPi() {
-
-      if (!Pi) {
-        alert("SDK chưa sẵn sàng");
+      const statusText = document.getElementById("status").innerText;
+      if (!statusText.includes("Xin chào")) {
+        alert("Đợi xíu cho nó hiện tên nghệ nhân rồi hãy bấm nạp Nhi ơi!");
         return;
       }
 
-      Pi.createPayment(
-        {
+      Pi.createPayment({
           amount: 10,
-          memo: "Nạp Pi Bonsai",
-          metadata: { type: "nap" }
-        },
-        {
+          memo: "Nạp 10 Pi vào sòng Bonsai 99",
+          metadata: { type: "casino_deposit" }
+        }, {
           onReadyForServerApproval: function (paymentId) {
-            console.log("Chờ duyệt:", paymentId);
+            console.log("Đang chờ Server duyệt:", paymentId);
           },
           onReadyForServerCompletion: function (paymentId, txid) {
-            alert("✅ Thành công");
+            alert("✅ Ting Ting! Nạp thành công. Chúc Nhi trúng lớn!");
           },
           onCancel: function () {
-            alert("❌ Huỷ");
+            alert("❌ Mầy vừa hủy lệnh nạp!");
           },
           onError: function (err) {
-            alert("❌ Lỗi: " + err.message);
+            alert("❌ Lỗi thanh toán: " + err.message);
           }
         }
       );

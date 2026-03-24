@@ -1,73 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>BONSAI PI 99</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <style>
-        body { background: #064e3b; color: gold; text-align: center; font-family: sans-serif; padding-top: 50px; }
-        .btn { background: #facc15; color: black; padding: 20px 40px; border-radius: 15px; font-weight: bold; font-size: 24px; border: none; cursor: pointer; margin-top: 20px; }
-        #status { padding: 10px; margin: 10px; border-radius: 10px; display: inline-block; }
-    </style>
-</head>
-<body>
-    <h1>🎰 BONSAI PI 99 🎰</h1>
-    <div id="status" style="background: rgba(0,0,0,0.3);">🔄 Đang kích rễ SDK...</div>
-    <br>
-    <button class="btn" onclick="napPi()">NẠP 10 PI</button>
+<div id="auth-box" style="text-align: center; background-color: #1a472a; color: white; padding: 30px; border-radius: 15px;">
+    <h1>🌳 BONSAI PI 99 🌳</h1>
+    <p>Hệ thống quản lý vườn kiểng</p>
+    <input type="email" id="email" placeholder="Nhập Gmail nghệ nhân"><br><br>
+    <input type="password" id="password" placeholder="Mật khẩu bảo mật"><br><br>
+    <button onclick="dangKy()" style="background: #ffc107; padding: 10px;">ĐĂNG KÝ HỘI VIÊN</button>
+    <button onclick="dangNhap()" style="background: #28a745; color: white; padding: 10px;">VÀO VƯỜN</button>
+</div>
 
-    <script>
-        // 1. Khởi tạo ngay khi vừa mở trang
-        window.onload = function() {
-            if (!window.Pi) {
-                document.getElementById("status").innerText = "❌ Mở bằng Pi Browser mậy ơi!";
-                return;
-            }
-
-            try {
-                // ÉP KHỞI TẠO SDK
-                window.Pi.init({ version: "2.0", sandbox: false });
-                
-                // ĐỢI 1 GIÂY RỒI MỚI ĐĂNG NHẬP CHO CHẮC
-                setTimeout(function() {
-                    window.Pi.authenticate(['username', 'payments'], function(p){})
-                        .then(function(auth) {
-                            document.getElementById("status").innerText = "✅ Nghệ nhân: " + auth.user.username;
-                        })
-                        .catch(function(e) {
-                            document.getElementById("status").innerText = "❌ Lỗi: " + e.message;
-                        });
-                }, 1000);
-            } catch (err) {
-                document.getElementById("status").innerText = "❌ Đang khởi động lại...";
-                location.reload(); // Tự load lại nếu lỗi SDK
-            }
-        };
-
-        function napPi() {
-            var s = document.getElementById("status").innerText;
-            if (!s.includes("Nghệ nhân")) {
-                alert("Đợi hiện tên Nghệ nhân rồi hãy bấm mậy ơi!");
-                return;
-            }
-
-            window.Pi.createPayment({
-                amount: 10,
-                memo: "Nap Pi Bonsai 99",
-                metadata: { type: "deposit" }
-            }, {
-                onReadyForServerApproval: function(id) {
-                    fetch('api/approve', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId: id })
-                    });
-                },
-                onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công!"); },
-                onCancel: function() { alert("❌ Hủy"); },
-                onError: function(e) { alert("❌ Lỗi: " + e.message); }
-            });
-        }
-    </script>
-</body>
-</html>
+<div id="game-lobby" style="display: none; text-align: center;">
+    <h2>✅ ĐÃ VÀO VƯỜN THÀNH CÔNG</h2>
+    <p id="wel-msg"></p>
+    <div style="border: 2px solid #28a745; padding: 20px; margin: 10px;">
+        <p>Số dư tài khoản: <span id="balance">0</span> Pi</p>
+        <button onclick="napPi()" style="background: #ffc107; font-weight: bold;">NẠP 10 PI ĐỂ CHĂM CÂY</button>
+    </div>
+    <button onclick="dangXuat()">RỜI VƯỜN</button>
+</div>

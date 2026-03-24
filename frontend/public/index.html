@@ -1,47 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cờ Tướng Pi 88</title>
+    <title>BONSAI PI 99</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { background: #1a1a1a; color: white; text-align: center; font-family: sans-serif; }
-        .btn-nap { background: #8a2be2; border: none; padding: 15px 30px; color: white; border-radius: 10px; cursor: pointer; }
+        body { 
+            background: #0a2f0a; /* Màu xanh lá đậm chất Bonsai */
+            color: #f0e68c; /* Màu vàng nhạt sang trọng */
+            text-align: center; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding-top: 50px;
+        }
+        .btn-nap { 
+            background: #2e8b57; /* Màu xanh lá cây */
+            border: 2px solid #f0e68c; 
+            padding: 15px 30px; 
+            color: white; 
+            border-radius: 20px; 
+            font-weight: bold;
+            cursor: pointer; 
+            font-size: 18px;
+        }
+        .btn-nap:hover { background: #3cb371; }
     </style>
 </head>
 <body>
-    <h1>CHÀO MỪNG ĐẾN VỚI CỜ TƯỚNG PI 88</h1>
-    <div id="user-info">Đang kết nối Pi...</div>
+    <h1>CHÀO MỪNG ĐẾN VỚI THẾ GIỚI BONSAI PI 99</h1>
+    <p>Nơi giao lưu và đấu giá những siêu phẩm Bonsai bằng Pi</p>
+    <div id="user-info">Đang kết nối vườn cây...</div>
     <br>
-    <button class="btn-nap" onclick="napPiSDK()">NẠP 10 PI QUA SDK</button>
+    <button class="btn-nap" onclick="napPiSDK()">NẠP 10 PI SỞ HỮU SIÊU PHẨM</button>
 
     <script>
-        // Khởi tạo Pi SDK
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: true });
 
-        // Tự động lấy tên người dùng
         Pi.authenticate(['username', 'payments'], onIncompletePaymentFound)
           .then(function(auth) {
-            document.getElementById('user-info').innerText = "Xin chào: " + auth.user.username;
+            document.getElementById('user-info').innerText = "Nghệ nhân: " + auth.user.username;
           });
 
-        function onIncompletePaymentFound(payment) { /* Xử lý thanh toán dở dang */ }
+        function onIncompletePaymentFound(payment) { }
 
         function napPiSDK() {
             Pi.createPayment({
                 amount: 10,
-                memo: "Nạp tiền chơi Cờ Tướng Pi 88",
-                metadata: { orderId: "DH" + Date.now() },
+                memo: "Giao dịch Bonsai trên BONSAI_PI99",
+                metadata: { category: "bonsai_purchase" },
             }, {
-                onReadyForServerApproval: function(paymentId) {
-                    console.log("Đang chờ Server duyệt...");
-                    // Chỗ này Backend của mầy sẽ nhảy vào xác nhận
-                },
-                onReadyForServerCompletion: function(paymentId, txid) {
-                    alert("Nạp thành công! TXID: " + txid);
-                },
-                onCancel: function(paymentId) { console.log("Người dùng đã hủy"); },
-                onError: function(error, payment) { console.error(error); }
+                onReadyForServerApproval: function(paymentId) { console.log("Đang duyệt..."); },
+                onReadyForServerCompletion: function(paymentId, txid) { alert("Giao dịch thành công!"); },
+                onCancel: function(paymentId) { },
+                onError: function(error) { console.error(error); }
             });
         }
     </script>

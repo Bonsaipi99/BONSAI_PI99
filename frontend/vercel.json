@@ -1,6 +1,12 @@
 {
-  "version": 2,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/fronend/public/index.html" }
+    {
+      "source": "/validation-key.txt",
+      "destination": "/frontend/public/validation-key.txt"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/public/index.html"
+    }
   ]
 }

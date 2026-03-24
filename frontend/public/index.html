@@ -51,11 +51,20 @@
           memo: "Nap Pi Bonsai 99",
           metadata: { type: "deposit" }
       }, {
-          onReadyForServerApproval: function(id) { console.log("Duyet: " + id); },
-          onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công!"); },
-          onCancel: function() { alert("❌ Huỷ"); },
-          onError: function(err) { alert("❌ Lỗi nạp: " + err.message); }
-      });
+          onReadyForServerApproval: function(id) { 
+            console.log("Đang ép Server duyệt lệnh: " + id);
+            // Đây là lệnh cực kỳ quan trọng để Server mầy xác nhận với Pi Network
+            fetch('/api/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId: id })
+            }).then(function() {
+                console.log("Server đã gật đầu!");
+            });
+        },
+        onReadyForServerCompletion: function(id, tx) { 
+            alert("✅ Thành công rồi Nhi ơi! Lên Mainnet thôi!"); 
+        },
     }
   </script>
 </body>

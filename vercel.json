@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/validation-key.txt",
+      "destination": "/frontend/public/validation-key.txt"
+    },
+    {
       "source": "/(.*)",
       "destination": "/frontend/public/index.html"
     }

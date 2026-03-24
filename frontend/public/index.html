@@ -1,62 +1,65 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <title>BONSAI PI 99</title>
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-  <style>
-    body { background: #064e3b; color: gold; text-align: center; font-family: sans-serif; padding-top: 80px; }
-    .card { border: 2px solid gold; display: inline-block; padding: 20px; border-radius: 15px; background: rgba(0,0,0,0.2); }
-    button { background: gold; color: black; padding: 15px 25px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-size: 18px; margin-top: 20px; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>🎰 BONSAI PI 99 🎰</h1>
-    <p id="status">🔄 Đang đánh thức SDK...</p>
-    <button onclick="napPi()">BẤM ĐỂ NẠP 10 PI</button>
-  </div>
+<script>
+    // 1. Dùng biến toàn cục để tránh lỗi "undefined"
+    var Pi = window.Pi;
 
-  <script>
     window.onload = function () {
+      var statusMsg = document.getElementById("status");
+      
       if (!window.Pi) {
-        document.getElementById("status").innerText = "❌ Lỗi: Mở bằng Pi Browser nha mậy!";
+        statusMsg.innerText = "❌ Lỗi: Mở bằng Pi Browser nha mậy!";
         return;
       }
 
-      const Pi = window.Pi;
       try {
-        // BUỘC PHẢI INIT TRƯỚC
-        Pi.init({ version: "2.0", sandbox: false });
-        
-        // ĐỢI 1 GIÂY RỒI MỚI LOGIN
+        // 2. ÉP KHỞI TẠO NGAY LẬP TỨC
+        window.Pi.init({ version: "2.0", sandbox: false });
+        console.log("SDK đã thức!");
+
+        // 3. ĐỢI MỘT CHÚT RỒI MỚI ĐĂNG NHẬP (Tránh bị kẹt)
         setTimeout(function() {
-          Pi.authenticate(['username', 'payments'], function(p){})
-            .then(function(auth) {
-              document.getElementById("status").innerText = "✅ Nghệ nhân: " + auth.user.username;
-            })
-            .catch(function(err) {
-              document.getElementById("status").innerText = "❌ Lỗi: " + err.message;
-            });
-        }, 1000);
+          statusMsg.innerText = "🔄 Đang tìm ví nghệ nhân...";
+          
+          window.Pi.authenticate(['username', 'payments'], function(payment) {
+            // Xử lý các thanh toán chưa hoàn tất
+          })
+          .then(function(auth) {
+            statusMsg.innerText = "✅ Nghệ nhân: " + auth.user.username;
+          })
+          .catch(function(err) {
+            statusMsg.innerText = "❌ Lỗi kết nối: " + err.message;
+            console.error(err);
+          });
+        }, 1500); // Tăng thời gian chờ lên 1.5 giây cho chắc
+
       } catch (e) {
-        document.getElementById("status").innerText = "❌ Crash: " + e.message;
+        statusMsg.innerText = "❌ Lỗi khởi tạo: " + e.message;
       }
     };
 
     function napPi() {
-      if (!window.Pi) return;
+      var statusTxt = document.getElementById("status").innerText;
+      if (!statusTxt.includes("Nghệ nhân")) {
+        alert("Chưa hiện tên Nghệ nhân là chưa nạp được đâu Nhi!");
+        return;
+      }
+
       window.Pi.createPayment({
           amount: 10,
           memo: "Nap Pi Bonsai 99",
           metadata: { type: "deposit" }
       }, {
-          onReadyForServerApproval: function(id) { console.log("Duyet: " + id); },
-          onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công!"); },
-          onCancel: function() { alert("❌ Huỷ"); },
+          onReadyForServerApproval: function(id) { 
+            console.log("Đang duyệt lệnh: " + id);
+            // Báo cho Server dùng PI_API_KEY để Approve
+            fetch('/api/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId: id })
+            });
+          },
+          onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công rồi mậy!"); },
+          onCancel: function() { alert("❌ Huỷ nạp"); },
           onError: function(err) { alert("❌ Lỗi nạp: " + err.message); }
       });
     }
   </script>
-</body>
-</html>

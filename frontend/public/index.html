@@ -18,66 +18,45 @@
   </div>
 
   <script>
-  // Chạy ngay khi trang vừa load xong
-  window.onload = function() {
-    // 1. Kiểm tra xem có đang mở trong Pi Browser không
-    if (!window.Pi) {
-      document.getElementById("status").innerText = "❌ Lỗi: Hãy mở bằng Pi Browser mậy ơi!";
-      return;
-    }
+    window.onload = function () {
+      if (!window.Pi) {
+        document.getElementById("status").innerText = "❌ Lỗi: Mở bằng Pi Browser nha mậy!";
+        return;
+      }
 
-    const Pi = window.Pi;
-
-    try {
-      // 2. KHỞI TẠO SDK TRƯỚC (Dùng bản chạy thật sandbox: false)
-      Pi.init({ version: "2.0", sandbox: false });
-      console.log("SDK đã thức!");
-
-      // 3. ĐỢI 1 GIÂY CHO CHẮC RỒI MỚI ĐĂNG NHẬP
-      setTimeout(function() {
-        document.getElementById("status").innerText = "🔄 Đang tìm ví nghệ nhân...";
+      const Pi = window.Pi;
+      try {
+        // BUỘC PHẢI INIT TRƯỚC
+        Pi.init({ version: "2.0", sandbox: false });
         
-        Pi.authenticate(['username', 'payments'], function(payment) {
-          // Xử lý thanh toán dở dang nếu có
-        })
-        .then(function(auth) {
-          // HIỆN TÊN LÀ THÀNH CÔNG
-          document.getElementById("status").innerText = "✅ Nghệ nhân: " + auth.user.username;
-        })
-        .catch(function(err) {
-          document.getElementById("status").innerText = "❌ Lỗi kết nối: " + err.message;
-        });
-      }, 1000);
+        // ĐỢI 1 GIÂY RỒI MỚI LOGIN
+        setTimeout(function() {
+          Pi.authenticate(['username', 'payments'], function(p){})
+            .then(function(auth) {
+              document.getElementById("status").innerText = "✅ Nghệ nhân: " + auth.user.username;
+            })
+            .catch(function(err) {
+              document.getElementById("status").innerText = "❌ Lỗi: " + err.message;
+            });
+        }, 1000);
+      } catch (e) {
+        document.getElementById("status").innerText = "❌ Crash: " + e.message;
+      }
+    };
 
-    } catch (e) {
-      document.getElementById("status").innerText = "❌ Crash: " + e.message;
+    function napPi() {
+      if (!window.Pi) return;
+      window.Pi.createPayment({
+          amount: 10,
+          memo: "Nap Pi Bonsai 99",
+          metadata: { type: "deposit" }
+      }, {
+          onReadyForServerApproval: function(id) { console.log("Duyet: " + id); },
+          onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công!"); },
+          onCancel: function() { alert("❌ Huỷ"); },
+          onError: function(err) { alert("❌ Lỗi nạp: " + err.message); }
+      });
     }
-  };
-
-  // 4. HÀM NẠP TIỀN
-  function napPi() {
-    const statusText = document.getElementById("status").innerText;
-    if (!statusText.includes("Nghệ nhân")) {
-      alert("Đợi hiện tên Nghệ nhân rồi hãy bấm nạp Nhi ơi!");
-      return;
-    }
-
-    window.Pi.createPayment({
-      amount: 10,
-      memo: "Nạp 10 Pi Bonsai 99",
-      metadata: { type: "deposit" }
-    }, {
-      onReadyForServerApproval: function(paymentId) {
-        console.log("Đang duyệt lệnh:", paymentId);
-        // Lệnh này để báo Server mầy dùng PI_API_KEY duyệt thanh toán
-        fetch('/api/approve', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentId: paymentId })
-        });
-      },
-      onReadyForServerCompletion: function(paymentId, txid) {
-        alert("✅ Ting Ting! Nạp thành công rồi mậy!");
-      },
-      onCancel: function() { alert("❌ Mầy hủy lệnh nạp rồi!"); },
-      onError: function(err) { alert("❌ Lỗi: " + err.message); }
+  </script>
+</body>
+</html>

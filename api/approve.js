@@ -1,24 +1,20 @@
-export default async function handler(req, res) {
+const axios = require('axios');
+
+module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+  
   const { paymentId } = req.body;
-  const apiKey = process.env.PI_API_KEY; // Nó sẽ tự lấy mã mầy đã dán bên Vercel
+  const apiKey = process.env.PI_API_KEY;
 
   try {
-    const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
-      method: 'POST',
-      headers: { 
-        'Authorization': `Key ${apiKey}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await axios.post(
+      `https://api.minepi.com/v2/payments/${paymentId}/approve`,
+      {},
+      { headers: { 'Authorization': `Key ${apiKey}` } }
+    );
 
-    if (response.ok) {
-      return res.status(200).json({ message: "Duyệt thành công!" });
-    } else {
-      const errorData = await response.json();
-      return res.status(500).json({ error: errorData });
-    }
+    res.status(200).json({ message: "Duyệt thành công!" });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
-}
+};

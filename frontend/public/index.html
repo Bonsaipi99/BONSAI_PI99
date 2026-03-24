@@ -6,31 +6,39 @@
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { background: #064e3b; color: gold; text-align: center; font-family: sans-serif; padding-top: 50px; }
-        button { background: gold; color: black; padding: 20px; border-radius: 10px; font-weight: bold; font-size: 20px; cursor: pointer; }
+        .btn { background: #facc15; color: black; padding: 20px 40px; border-radius: 15px; font-weight: bold; font-size: 24px; border: none; cursor: pointer; margin-top: 20px; box-shadow: 0 4px #a16207; }
+        .btn:active { box-shadow: none; transform: translateY(4px); }
     </style>
 </head>
 <body>
     <h1>🎰 BONSAI PI 99 🎰</h1>
-    <h2 id="status">Đang tải...</h2>
-    <button onclick="napPi()">NẠP 10 PI</button>
+    <h2 id="status">🔄 Đang đánh thức hệ thống...</h2>
+    
+    <button class="btn" onclick="napPi()">NẠP 10 PI</button>
 
     <script>
+        // 2. Chờ trang web load xong mới chạy
         window.onload = function() {
             if (!window.Pi) {
-                document.getElementById("status").innerText = "Mở bằng Pi Browser mậy ơi!";
+                document.getElementById("status").innerText = "❌ Mở bằng Pi Browser mậy ơi!";
                 return;
             }
+
+            // 3. KHỞI TẠO SDK - THIẾU DÒNG NÀY LÀ LỖI NHƯ HÌNH MẦY GỬI
             window.Pi.init({ version: "2.0", sandbox: false });
             
+            // 4. ĐĂNG NHẬP
             window.Pi.authenticate(['username', 'payments'], function(p){})
                 .then(function(auth) {
-                    document.getElementById("status").innerText = "Nghệ nhân: " + auth.user.username;
+                    document.getElementById("status").innerText = "✅ Nghệ nhân: " + auth.user.username;
+                    document.getElementById("status").style.color = "#4ade80";
                 })
                 .catch(function(e) {
-                    document.getElementById("status").innerText = "Lỗi: " + e.message;
+                    document.getElementById("status").innerText = "❌ Lỗi: " + e.message;
                 });
         };
 
+        // 5. HÀM XỬ LÝ NẠP TIỀN
         function napPi() {
             window.Pi.createPayment({
                 amount: 10,
@@ -38,15 +46,16 @@
                 metadata: { type: "deposit" }
             }, {
                 onReadyForServerApproval: function(id) {
+                    // Báo cho Server duyệt lệnh
                     fetch('/api/approve', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ paymentId: id })
                     });
                 },
-                onReadyForServerCompletion: function(id, tx) { alert("Thành công!"); },
-                onCancel: function() { alert("Hủy rồi!"); },
-                onError: function(e) { alert("Lỗi: " + e.message); }
+                onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công rồi Nhi ơi!"); },
+                onCancel: function() { alert("❌ Mầy hủy nạp rồi!"); },
+                onError: function(e) { alert("❌ Lỗi: " + e.message); }
             });
         }
     </script>

@@ -146,46 +146,65 @@ async function napPi() {
 }
 </script>
 </div> 
-<script>
-async function napPi() {
-    // 1. Kiểm tra xem mầy có đang mở bằng Pi Browser không
-    if (!window.Pi) {
-        return alert("Nhi ơi, mở bằng Pi Browser mới nạp được mậy!");
-    }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>BONSAI PI 99</title>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <style>
+    body { background: #064e3b; color: gold; text-align: center; font-family: sans-serif; padding-top: 80px; }
+    .card { border: 2px solid gold; display: inline-block; padding: 20px; border-radius: 15px; background: rgba(0,0,0,0.2); }
+    button { background: gold; color: black; padding: 15px 25px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-size: 18px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎰 BONSAI PI 99 🎰</h1>
+    <p id="status">🔄 Đang đánh thức SDK...</p>
+    <button onclick="napPi()">BẤM ĐỂ NẠP 10 PI</button>
+  </div>
 
-    // 2. Kiểm tra xem mầy đã đăng nhập chưa để còn biết nạp tiền cho ai
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        return alert("Mầy chưa Đăng Nhập mà nạp cái gì? Đăng nhập Gmail trước đi!");
-    }
+  <script>
+    window.onload = function () {
+      if (!window.Pi) {
+        document.getElementById("status").innerText = "❌ Lỗi: Mở bằng Pi Browser nha mậy!";
+        return;
+      }
 
-    try {
-        // 3. ĐÂY LÀ LỆNH GỌI SDK PI ĐỂ HIỆN BẢNG THÀNH TOÁN
-        const payment = await window.Pi.createPayment({
-            amount: 10,
-            memo: "Nạp 10 Pi vào vườn Bonsai 99",
-            metadata: { uid: user.uid, gmail: user.email }
-        }, {
-            onReadyForServerApproval: function(paymentId) {
-                // Báo cho server của mầy duyệt lệnh
-                fetch('/api/approve', {
-                    method: 'POST',
-                    body: JSON.stringify({ paymentId: paymentId })
-                });
-            },
-            onReadyForServerCompletion: function(paymentId, txid) {
-                // Nạp xong thì cộng 10 Pi vào sổ cái Firebase của mầy
-                firebase.database().ref('users/' + user.uid + '/balance').transaction((current) => {
-                    return (current || 0) + 10;
-                });
-                alert("✅ Thành công! 10 Pi đã vào túi mầy rồi đó Nhi.");
-                location.reload(); 
-            },
-            onCancel: function() { alert("❌ Huỷ lệnh nạp rồi!"); },
-            onError: function(err) { alert("❌ Lỗi SDK: " + err.message); }
-        });
-    } catch (e) {
-        alert("❌ Lỗi kết nối SDK: " + e.message);
-    }
-}
-</script>
+      const Pi = window.Pi;
+      try {
+        // BUỘC PHẢI INIT TRƯỚC
+        Pi.init({ version: "2.0", sandbox: false });
+        
+        // ĐỢI 1 GIÂY RỒI MỚI LOGIN
+        setTimeout(function() {
+          Pi.authenticate(['username', 'payments'], function(p){})
+            .then(function(auth) {
+              document.getElementById("status").innerText = "✅ Nghệ nhân: " + auth.user.username;
+            })
+            .catch(function(err) {
+              document.getElementById("status").innerText = "❌ Lỗi: " + err.message;
+            });
+        }, 1000);
+      } catch (e) {
+        document.getElementById("status").innerText = "❌ Crash: " + e.message;
+      }
+    };
+
+    function napPi() {
+      if (!window.Pi) return;
+      window.Pi.createPayment({
+          amount: 10,
+          memo: "Nap Pi Bonsai 99",
+          metadata: { type: "deposit" }
+      }, {
+          onReadyForServerApproval: function(id) { console.log("Duyet: " + id); },
+          onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công!"); },
+          onCancel: function() { alert("❌ Huỷ"); },
+          onError: function(err) { alert("❌ Lỗi nạp: " + err.message); }
+      });
+    }
+  </script>
+</body>
+</html> giờ sữa nút nạp để hoàn thành bước 10 pi browser nha

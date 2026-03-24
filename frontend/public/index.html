@@ -57,7 +57,7 @@
                 metadata: { type: "deposit" }
             }, {
                 onReadyForServerApproval: function(id) {
-                    fetch('/api/approve', {
+                    fetch('api/approve', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ paymentId: id })

@@ -1,60 +1,62 @@
-<script>
-    // 1. Gán biến Pi ra ngoài để hàm nào cũng thấy
-    var Pi = window.Pi;
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>BONSAI PI 99</title>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <style>
+    body { background: #064e3b; color: gold; text-align: center; font-family: sans-serif; padding-top: 80px; }
+    .card { border: 2px solid gold; display: inline-block; padding: 20px; border-radius: 15px; background: rgba(0,0,0,0.2); }
+    button { background: gold; color: black; padding: 15px 25px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-size: 18px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎰 BONSAI PI 99 🎰</h1>
+    <p id="status">🔄 Đang đánh thức SDK...</p>
+    <button onclick="napPi()">BẤM ĐỂ NẠP 10 PI</button>
+  </div>
 
-    // 2. Hàm khởi động hệ thống
-    function batDauHeThong() {
-      document.getElementById("status").innerText = "🔄 Đang đánh thức SDK...";
-      
+  <script>
+    window.onload = function () {
+      if (!window.Pi) {
+        document.getElementById("status").innerText = "❌ Lỗi: Mở bằng Pi Browser nha mậy!";
+        return;
+      }
+
+      const Pi = window.Pi;
       try {
-        // Khởi tạo trước tất cả mọi thứ
-        window.Pi.init({ version: "2.0", sandbox: false });
-        console.log("SDK đã thức dậy!");
-
-        // Đợi 1 giây cho chắc rồi mới đòi đăng nhập
+        // BUỘC PHẢI INIT TRƯỚC
+        Pi.init({ version: "2.0", sandbox: false });
+        
+        // ĐỢI 1 GIÂY RỒI MỚI LOGIN
         setTimeout(function() {
-          document.getElementById("status").innerText = "🔄 Đang tìm ví nghệ nhân...";
-          
-          window.Pi.authenticate(['username', 'payments'], function(payment) {})
+          Pi.authenticate(['username', 'payments'], function(p){})
             .then(function(auth) {
               document.getElementById("status").innerText = "✅ Nghệ nhân: " + auth.user.username;
             })
             .catch(function(err) {
-              document.getElementById("status").innerText = "❌ Lỗi kết nối: " + err.message;
+              document.getElementById("status").innerText = "❌ Lỗi: " + err.message;
             });
         }, 1000);
-
       } catch (e) {
-        document.getElementById("status").innerText = "❌ Lỗi khởi tạo: " + e.message;
-      }
-    }
-
-    // 3. Chạy hệ thống ngay khi load trang
-    window.onload = function() {
-      if (window.Pi) {
-        batDauHeThong();
-      } else {
-        document.getElementById("status").innerText = "❌ Không tìm thấy SDK. Dùng Pi Browser nha!";
+        document.getElementById("status").innerText = "❌ Crash: " + e.message;
       }
     };
 
-    // 4. Hàm nạp tiền
     function napPi() {
-      var status = document.getElementById("status").innerText;
-      if (!status.includes("Nghệ nhân")) {
-        alert("Chưa hiện tên Nghệ nhân là chưa nạp được đâu Nhi!");
-        return;
-      }
-
+      if (!window.Pi) return;
       window.Pi.createPayment({
-        amount: 10,
-        memo: "Nap Pi Bonsai 99",
-        metadata: { type: "nap" }
+          amount: 10,
+          memo: "Nap Pi Bonsai 99",
+          metadata: { type: "deposit" }
       }, {
-        onReadyForServerApproval: function(id) { console.log("Duyet: " + id); },
-        onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công rồi mậy!"); },
-        onCancel: function() { alert("❌ Huỷ nạp"); },
-        onError: function(err) { alert("❌ Lỗi: " + err.message); }
+          onReadyForServerApproval: function(id) { console.log("Duyet: " + id); },
+          onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công!"); },
+          onCancel: function() { alert("❌ Huỷ"); },
+          onError: function(err) { alert("❌ Lỗi nạp: " + err.message); }
       });
     }
   </script>
+</body>
+</html>

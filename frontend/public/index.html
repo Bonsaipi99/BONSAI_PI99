@@ -1,51 +1,75 @@
-<script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BONSAI PI 99 - CASINO</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        body { 
+            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%); /* Nền đen sâu thẳm */
+            color: #ffd700; /* Chữ vàng kim sang trọng */
+            text-align: center; 
+            font-family: 'Arial', sans-serif; 
+            padding-top: 50px;
+        }
+        .casino-card {
+            border: 2px solid #ffd700;
+            display: inline-block;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px #ffd700;
+            background: rgba(0,0,0,0.8);
+        }
+        .btn-nap { 
+            background: linear-gradient(145deg, #ffd700, #b8860b);
+            border: none; 
+            padding: 20px 40px; 
+            color: black; 
+            border-radius: 50px; 
+            font-weight: bold;
+            cursor: pointer; 
+            font-size: 20px;
+            box-shadow: 0 5px #666;
+            margin-top: 20px;
+        }
+        .btn-nap:active {
+            box-shadow: 0 2px #666;
+            transform: translateY(4px);
+        }
+    </style>
+</head>
+<body>
+    <div class="casino-card">
+        <h1>🎰 BONSAI PI 99 CASINO 🎰</h1>
+        <p>Nạp Pi ngay để sở hữu những phôi Mai "Siêu Bông Bình Lợi"!</p>
+        <div id="user-info">Đang kết nối ví nghệ nhân...</div>
+        <button class="btn-nap" onclick="napPiSDK()">NẠP 10 PI VÀO SÒNG</button>
+    </div>
+
+    <script>
         const Pi = window.Pi;
-        // Chế độ Sandbox: false vì app mầy đã lên Production
+        // QUAN TRỌNG: Đã đổi sandbox thành false để nút hoạt động
         Pi.init({ version: "2.0", sandbox: false }); 
 
-        // Hàm tự động kết nối khi vừa vào app
-        function connectWallet() {
-            Pi.authenticate(['username', 'payments'], onIncompletePaymentFound)
-              .then(function(auth) {
-                document.getElementById('user-info').innerText = "Chào Nghệ nhân: " + auth.user.username;
-                console.log("Đã kết nối ví thành công!");
-              })
-              .catch(function(error) {
-                document.getElementById('user-info').innerText = "Lỗi kết nối ví. Vui lòng tải lại!";
-                console.error(error);
-              });
-        }
+        Pi.authenticate(['username', 'payments'], onIncompletePaymentFound)
+          .then(function(auth) {
+            document.getElementById('user-info').innerText = "Nghệ nhân: " + auth.user.username;
+          });
 
-        // Gọi kết nối ngay khi app load
-        connectWallet();
-
-        function onIncompletePaymentFound(payment) {
-            // Tự động hoàn tất nếu có giao dịch bị kẹt
-            console.log("Tìm thấy giao dịch chưa hoàn tất:", payment);
-        }
+        function onIncompletePaymentFound(payment) { }
 
         function napPiSDK() {
-            // Kiểm tra xem đã đăng nhập chưa trước khi cho nạp
-            const userInfo = document.getElementById('user-info').innerText;
-            if (userInfo.includes("Đang kết nối") || userInfo.includes("Lỗi")) {
-                alert("Mầy đợi xíu cho nó hiện tên Nghệ nhân rồi hãy bấm nạp!");
-                connectWallet();
-                return;
-            }
-
+            console.log("Nhi đang bấm nạp...");
             Pi.createPayment({
                 amount: 10,
-                memo: "Nạp Pi vào sòng BONSAI PI 99",
+                memo: "Nạp Pi vào sòng BONSAI_PI99",
                 metadata: { type: "casino_deposit" },
             }, {
-                onReadyForServerApproval: function(paymentId) {
-                    console.log("Giao dịch đang chờ duyệt:", paymentId);
-                },
-                onReadyForServerCompletion: function(paymentId, txid) {
-                    alert("Ting ting! Nạp 10 Pi thành công. Vào sòng thôi Nhi ơi!");
-                },
-                onCancel: function(paymentId) { console.log("Hủy nạp"); },
-                onError: function(error) { alert("Lỗi Pi SDK: " + error.message); }
+                onReadyForServerApproval: function(paymentId) { alert("Đang chờ duyệt lệnh!"); },
+                onReadyForServerCompletion: function(paymentId, txid) { alert("Nạp thành công! Chúc Nhi trúng lớn!"); },
+                onCancel: function(paymentId) { },
+                onError: function(error) { alert("Lỗi nạp: " + error.message); }
             });
         }
     </script>
+</body>
+</html>

@@ -1,107 +1,57 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <title>BONSAI PI 99</title>
+<script>
+  let Pi;
 
-  <!-- ✅ BẮT BUỘC: Load Pi SDK -->
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  window.addEventListener("load", async function () {
 
-  <style>
-    body {
-      background: #064e3b;
-      color: gold;
-      text-align: center;
-      font-family: sans-serif;
-      padding-top: 100px;
+    if (!window.Pi) {
+      document.getElementById("status").innerText = "❌ Không có Pi SDK";
+      return;
     }
-    button {
-      background: gold;
-      color: black;
-      padding: 15px 25px;
-      border-radius: 10px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
+
+    Pi = window.Pi;
+
+    try {
+      await Pi.init({ version: "2.0", sandbox: true });
+
+      document.getElementById("status").innerText = "🔄 Đang đăng nhập...";
+
+      const auth = await Pi.authenticate(['username', 'payments']);
+
+      document.getElementById("status").innerText =
+        "✅ Xin chào: " + auth.user.username;
+
+    } catch (err) {
+      document.getElementById("status").innerText =
+        "❌ Lỗi: " + err.message;
     }
-  </style>
-</head>
+  });
 
-<body>
-  <h1>🎰 BONSAI PI 99 🎰</h1>
-  <p id="status">Đang khởi tạo...</p>
+  function napPi() {
+    if (!Pi) {
+      alert("SDK chưa sẵn sàng");
+      return;
+    }
 
-  <button onclick="napPi()">BẤM ĐỂ NẠP 10 PI</button>
-
-  <script>
-    let Pi;
-
-    // 🚀 Khi load xong
-    window.onload = function () {
-
-      // ❌ Nếu không có SDK
-      if (!window.Pi) {
-        document.getElementById("status").innerText = "❌ Không load được Pi SDK";
-        return;
-      }
-
-      Pi = window.Pi;
-
-      // ✅ Init SDK
-      Pi.init({
-        version: "2.0",
-        sandbox: true   // 👉 test thì để true, live thì false
-      });
-
-      document.getElementById("status").innerText = "🔄 Đang kết nối Pi...";
-
-      // ✅ Login + quyền payment
-      Pi.authenticate(['username', 'payments'], function(payment) {})
-        .then(function(auth) {
-          document.getElementById("status").innerText =
-            "✅ Xin chào: " + auth.user.username;
-        })
-        .catch(function(err) {
-          document.getElementById("status").innerText =
-            "❌ Lỗi kết nối: " + err.message;
-        });
-    };
-
-    // 💰 Hàm thanh toán
-    function napPi() {
-
-      if (!Pi) {
-        alert("SDK chưa sẵn sàng");
-        return;
-      }
-
-      Pi.createPayment(
-        {
-          amount: 10,
-          memo: "Nạp Pi vào Bonsai",
-          metadata: { type: "nap_pi" }
+    Pi.createPayment(
+      {
+        amount: 10,
+        memo: "Nạp Pi Bonsai",
+        metadata: { type: "nap" }
+      },
+      {
+        onReadyForServerApproval: function (paymentId) {
+          console.log("Chờ duyệt:", paymentId);
         },
-        {
-          onReadyForServerApproval: function(paymentId) {
-            console.log("🟡 Chờ duyệt: ", paymentId);
-          },
-
-          onReadyForServerCompletion: function(paymentId, txid) {
-            alert("✅ Nạp thành công!");
-            console.log("TXID:", txid);
-          },
-
-          onCancel: function(paymentId) {
-            alert("❌ Đã hủy");
-          },
-
-          onError: function(error) {
-            alert("❌ Lỗi: " + error.message);
-          }
+        onReadyForServerCompletion: function (paymentId, txid) {
+          alert("✅ Thành công");
+        },
+        onCancel: function () {
+          alert("❌ Huỷ");
+        },
+        onError: function (err) {
+          alert("❌ Lỗi: " + err.message);
         }
-      );
-    }
-  </script>
-</body>
-</html>
+      }
+    );
+  }
+</script>

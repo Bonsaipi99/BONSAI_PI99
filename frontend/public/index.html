@@ -1,73 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>BONSAI PI 99 - CASINO</title>
+    <title>BONSAI PI 99</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { 
-            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%); /* Nền đen sâu thẳm */
-            color: #ffd700; /* Chữ vàng kim sang trọng */
-            text-align: center; 
-            font-family: 'Arial', sans-serif; 
-            padding-top: 50px;
-        }
-        .casino-card {
-            border: 2px solid #ffd700;
-            display: inline-block;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 20px #ffd700;
-            background: rgba(0,0,0,0.8);
-        }
-        .btn-nap { 
-            background: linear-gradient(145deg, #ffd700, #b8860b);
-            border: none; 
-            padding: 20px 40px; 
-            color: black; 
-            border-radius: 50px; 
-            font-weight: bold;
-            cursor: pointer; 
-            font-size: 20px;
-            box-shadow: 0 5px #666;
-            margin-top: 20px;
-        }
-        .btn-nap:active {
-            box-shadow: 0 2px #666;
-            transform: translateY(4px);
-        }
+        body { background-color: #002200; color: gold; text-align: center; font-family: sans-serif; padding-top: 100px; }
+        .btn { background: gold; padding: 20px; border-radius: 10px; font-weight: bold; cursor: pointer; color: black; display: inline-block; }
     </style>
 </head>
 <body>
-    <div class="casino-card">
-        <h1>🎰 BONSAI PI 99 CASINO 🎰</h1>
-        <p>Nạp Pi ngay để sở hữu những phôi Mai "Siêu Bông Bình Lợi"!</p>
-        <div id="user-info">Đang kết nối ví nghệ nhân...</div>
-        <button class="btn-nap" onclick="napPiSDK()">NẠP 10 PI VÀO SÒNG</button>
-    </div>
+    <h1>🎰 BONSAI PI 99 🎰</h1>
+    <div id="status">Đang kết nối ví...</div>
+    <br><br>
+    <div class="btn" onclick="napPi()">BẤM ĐỂ NẠP 10 PI</div>
 
     <script>
         const Pi = window.Pi;
-        // QUAN TRỌNG: Đã đổi sandbox thành false để nút hoạt động
-        Pi.init({ version: "2.0", sandbox: false }); 
+        Pi.init({ version: "2.0", sandbox: false });
 
-        Pi.authenticate(['username', 'payments'], onIncompletePaymentFound)
+        Pi.authenticate(['username', 'payments'], function(payment) {})
           .then(function(auth) {
-            document.getElementById('user-info').innerText = "Nghệ nhân: " + auth.user.username;
+            document.getElementById('status').innerText = "Chào: " + auth.user.username;
+          })
+          .catch(function(err) {
+            document.getElementById('status').innerText = "Lỗi: " + err.message;
           });
 
-        function onIncompletePaymentFound(payment) { }
-
-        function napPiSDK() {
-            console.log("Nhi đang bấm nạp...");
+        function napPi() {
             Pi.createPayment({
                 amount: 10,
-                memo: "Nạp Pi vào sòng BONSAI_PI99",
-                metadata: { type: "casino_deposit" },
+                memo: "Nap Pi vao song Bonsai",
+                metadata: { type: "deposit" },
             }, {
-                onReadyForServerApproval: function(paymentId) { alert("Đang chờ duyệt lệnh!"); },
-                onReadyForServerCompletion: function(paymentId, txid) { alert("Nạp thành công! Chúc Nhi trúng lớn!"); },
-                onCancel: function(paymentId) { },
-                onError: function(error) { alert("Lỗi nạp: " + error.message); }
+                onReadyForServerApproval: function(id) { alert("Dang cho duyet: " + id); },
+                onReadyForServerCompletion: function(id, tx) { alert("Thành công!"); },
+                onCancel: function(id) { },
+                onError: function(err) { alert("Loi: " + err.message); }
             });
         }
     </script>

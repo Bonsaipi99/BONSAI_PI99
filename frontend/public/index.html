@@ -6,55 +6,65 @@
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { background: #064e3b; color: gold; text-align: center; font-family: sans-serif; padding-top: 50px; }
-        .btn { background: #facc15; color: black; padding: 20px 40px; border-radius: 15px; font-weight: bold; font-size: 24px; border: none; cursor: pointer; margin-top: 20px; box-shadow: 0 4px #a16207; }
-        .btn:active { box-shadow: none; transform: translateY(4px); }
+        .btn { background: #facc15; color: black; padding: 20px 40px; border-radius: 15px; font-weight: bold; font-size: 24px; border: none; cursor: pointer; margin-top: 20px; }
+        #status { padding: 10px; margin: 10px; border-radius: 10px; display: inline-block; }
     </style>
 </head>
 <body>
     <h1>🎰 BONSAI PI 99 🎰</h1>
-    <h2 id="status">🔄 Đang đánh thức hệ thống...</h2>
-    
+    <div id="status" style="background: rgba(0,0,0,0.3);">🔄 Đang kích rễ SDK...</div>
+    <br>
     <button class="btn" onclick="napPi()">NẠP 10 PI</button>
 
     <script>
-        // 2. Chờ trang web load xong mới chạy
+        // 1. Khởi tạo ngay khi vừa mở trang
         window.onload = function() {
             if (!window.Pi) {
                 document.getElementById("status").innerText = "❌ Mở bằng Pi Browser mậy ơi!";
                 return;
             }
 
-            // 3. KHỞI TẠO SDK - THIẾU DÒNG NÀY LÀ LỖI NHƯ HÌNH MẦY GỬI
-            window.Pi.init({ version: "2.0", sandbox: false });
-            
-            // 4. ĐĂNG NHẬP
-            window.Pi.authenticate(['username', 'payments'], function(p){})
-                .then(function(auth) {
-                    document.getElementById("status").innerText = "✅ Nghệ nhân: " + auth.user.username;
-                    document.getElementById("status").style.color = "#4ade80";
-                })
-                .catch(function(e) {
-                    document.getElementById("status").innerText = "❌ Lỗi: " + e.message;
-                });
+            try {
+                // ÉP KHỞI TẠO SDK
+                window.Pi.init({ version: "2.0", sandbox: false });
+                
+                // ĐỢI 1 GIÂY RỒI MỚI ĐĂNG NHẬP CHO CHẮC
+                setTimeout(function() {
+                    window.Pi.authenticate(['username', 'payments'], function(p){})
+                        .then(function(auth) {
+                            document.getElementById("status").innerText = "✅ Nghệ nhân: " + auth.user.username;
+                        })
+                        .catch(function(e) {
+                            document.getElementById("status").innerText = "❌ Lỗi: " + e.message;
+                        });
+                }, 1000);
+            } catch (err) {
+                document.getElementById("status").innerText = "❌ Đang khởi động lại...";
+                location.reload(); // Tự load lại nếu lỗi SDK
+            }
         };
 
-        // 5. HÀM XỬ LÝ NẠP TIỀN
         function napPi() {
+            var s = document.getElementById("status").innerText;
+            if (!s.includes("Nghệ nhân")) {
+                alert("Đợi hiện tên Nghệ nhân rồi hãy bấm mậy ơi!");
+                return;
+            }
+
             window.Pi.createPayment({
                 amount: 10,
                 memo: "Nap Pi Bonsai 99",
                 metadata: { type: "deposit" }
             }, {
                 onReadyForServerApproval: function(id) {
-                    // Báo cho Server duyệt lệnh
                     fetch('/api/approve', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ paymentId: id })
                     });
                 },
-                onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công rồi Nhi ơi!"); },
-                onCancel: function() { alert("❌ Mầy hủy nạp rồi!"); },
+                onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công!"); },
+                onCancel: function() { alert("❌ Hủy"); },
                 onError: function(e) { alert("❌ Lỗi: " + e.message); }
             });
         }

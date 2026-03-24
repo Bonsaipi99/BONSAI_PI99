@@ -16,3 +16,68 @@
     </div>
     <button onclick="dangXuat()">RỜI VƯỜN</button>
 </div>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+// 2. Dán chìa khóa Firebase mầy vừa lấy vào đây
+const firebaseConfig = {
+  apiKey: "AIzaSyBc4oPPt2AQdn6AW85DRpQSIuMyK1oJDlQ",
+  authDomain: "bonsaipi99.firebaseapp.com",
+  databaseURL: "https://bonsaipi99-default-rtdb.firebaseio.com",
+  projectId: "bonsaipi99",
+  storageBucket: "bonsaipi99.firebasestorage.app",
+  messagingSenderId: "119041490462",
+  appId: "1:119041490462:web:5635dc57b3eb6b49afb80f",
+  measurementId: "G-W7XQKDGW6X"
+};
+
+// Khởi tạo
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+// 3. Hàm Đăng Ký
+function dangKy() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+    
+    if(!email || !pass) return alert("Nhập đủ Gmail với mật khẩu mậy ơi!");
+
+    auth.createUserWithEmailAndPassword(email, pass)
+        .then((userCredential) => {
+            // Lưu Gmail vào Database để không bị mất số dư
+            db.ref('users/' + userCredential.user.uid).set({
+                gmail: email,
+                balance: 0
+            });
+            alert("Đăng ký thành công! Giờ mầy bấm VÀO VƯỜN nha.");
+        })
+        .catch((error) => alert("Lỗi rồi: " + error.message));
+}
+
+// 4. Hàm Đăng Nhập
+function dangNhap() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+
+    auth.signInWithEmailAndPassword(email, pass)
+        .then((userCredential) => {
+            document.getElementById('auth-box').style.display = 'none';
+            document.getElementById('game-lobby').style.display = 'block';
+            document.getElementById('wel-msg').innerText = "Chào nghệ nhân: " + email;
+            
+            // Lấy số dư từ Database hiện lên
+            db.ref('users/' + userCredential.user.uid).once('value', (snapshot) => {
+                document.getElementById('balance').innerText = snapshot.val().balance;
+            });
+        })
+        .catch((error) => alert("Sai mật khẩu hoặc Gmail rồi Nhi ơi!"));
+}
+
+// 5. Hàm Đăng Xuất (Thoát là sạch sẽ)
+function dangXuat() {
+    auth.signOut().then(() => { location.reload(); });
+}
+</script>

@@ -10,32 +10,39 @@
 </head>
 <body>
     <h1>🎰 BONSAI PI 99 🎰</h1>
-    <div id="status">Đang kết nối ví...</div>
+    <div id="status">Đang khởi tạo hệ thống...</div>
     <br><br>
     <div class="btn" onclick="napPi()">BẤM ĐỂ NẠP 10 PI</div>
 
     <script>
-        const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: false });
+        // Tuyệt chiêu: Đợi SDK sẵn sàng mới cho chạy
+        window.onload = function() {
+            const Pi = window.Pi;
+            Pi.init({ version: "2.0", sandbox: false });
+            
+            document.getElementById('status').innerText = "Đang kết nối ví...";
 
-        Pi.authenticate(['username', 'payments'], function(payment) {})
-          .then(function(auth) {
-            document.getElementById('status').innerText = "Chào: " + auth.user.username;
-          })
-          .catch(function(err) {
-            document.getElementById('status').innerText = "Lỗi: " + err.message;
-          });
+            Pi.authenticate(['username', 'payments'], function(payment) {})
+              .then(function(auth) {
+                document.getElementById('status').innerText = "Chào Nghệ nhân: " + auth.user.username;
+              })
+              .catch(function(err) {
+                document.getElementById('status').innerText = "Lỗi kết nối: " + err.message;
+              });
+        };
 
         function napPi() {
-            Pi.createPayment({
+            if (!window.Pi) { alert("SDK chưa tải xong, đợi xíu Nhi ơi!"); return; }
+            
+            window.Pi.createPayment({
                 amount: 10,
                 memo: "Nap Pi vao song Bonsai",
                 metadata: { type: "deposit" },
             }, {
-                onReadyForServerApproval: function(id) { alert("Dang cho duyet: " + id); },
-                onReadyForServerCompletion: function(id, tx) { alert("Thành công!"); },
+                onReadyForServerApproval: function(id) { console.log("Duyet: " + id); },
+                onReadyForServerCompletion: function(id, tx) { alert("Nạp thành công! Chúc Nhi trúng lớn!"); },
                 onCancel: function(id) { },
-                onError: function(err) { alert("Loi: " + err.message); }
+                onError: function(err) { alert("Lỗi nạp: " + err.message); }
             });
         }
     </script>

@@ -44,27 +44,32 @@
       }
     };
 
-    function napPi() {
-      if (!window.Pi) return;
-      window.Pi.createPayment({
-          amount: 10,
-          memo: "Nap Pi Bonsai 99",
-          metadata: { type: "deposit" }
-      }, {
-          onReadyForServerApproval: function(id) { 
-            console.log("Đang ép Server duyệt lệnh: " + id);
-            // Đây là lệnh cực kỳ quan trọng để Server mầy xác nhận với Pi Network
-            fetch('/api/approve', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId: id })
-            }).then(function() {
-                console.log("Server đã gật đầu!");
+   function napPi() {
+    if (!window.Pi) return;
+
+    window.Pi.createPayment({
+        amount: 10,
+        memo: "Nap Pi Bonsai 99",
+        metadata: { type: "deposit" }
+    }, {
+        // 🚨 CHỖ NÀY QUAN TRỌNG NÈ NHI:
+        onReadyForServerApproval: function(paymentId) {
+            console.log("Đang duyệt lệnh:", paymentId);
+            // Báo cho Backend của mầy biết để nó Approve với Pi Network
+            // Nếu mầy chưa có Backend xịn, hãy dùng lệnh fetch này:
+            fetch('/api/approve', { 
+                method: 'POST', 
+                body: JSON.stringify({ paymentId: paymentId }) 
             });
         },
-        onReadyForServerCompletion: function(id, tx) { 
-            alert("✅ Thành công rồi Nhi ơi! Lên Mainnet thôi!"); 
+        onReadyForServerCompletion: function(paymentId, txid) {
+            alert("✅ Đã nạp thành công 10 Pi!");
+            location.reload(); // Load lại trang để cập nhật
         },
+        onCancel: function() { alert("❌ Mầy đã hủy nạp"); },
+        onError: function(err) { alert("❌ Lỗi: " + err.message); }
+    });
+}
     }
   </script>
 </body>

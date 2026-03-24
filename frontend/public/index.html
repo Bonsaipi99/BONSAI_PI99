@@ -146,42 +146,46 @@ async function napPi() {
 }
 </script>
 </div> 
-
 <script>
-// 1. Hàm nạp 10 Pi
 async function napPi() {
-    const Pi = window.Pi;
-    const user = firebase.auth().currentUser;
+    // 1. Kiểm tra xem mầy có đang mở bằng Pi Browser không
+    if (!window.Pi) {
+        return alert("Nhi ơi, mở bằng Pi Browser mới nạp được mậy!");
+    }
 
+    // 2. Kiểm tra xem mầy đã đăng nhập chưa để còn biết nạp tiền cho ai
+    const user = firebase.auth().currentUser;
     if (!user) {
-        return alert("Nhi ơi, mầy phải đăng nhập trước mới nạp được!");
+        return alert("Mầy chưa Đăng Nhập mà nạp cái gì? Đăng nhập Gmail trước đi!");
     }
 
     try {
-        const payment = await Pi.createPayment({
+        // 3. ĐÂY LÀ LỆNH GỌI SDK PI ĐỂ HIỆN BẢNG THÀNH TOÁN
+        const payment = await window.Pi.createPayment({
             amount: 10,
-            memo: "Nạp 10 Pi chăm sóc Bonsai 99",
+            memo: "Nạp 10 Pi vào vườn Bonsai 99",
             metadata: { uid: user.uid, gmail: user.email }
         }, {
             onReadyForServerApproval: function(paymentId) {
+                // Báo cho server của mầy duyệt lệnh
                 fetch('/api/approve', {
                     method: 'POST',
                     body: JSON.stringify({ paymentId: paymentId })
                 });
             },
             onReadyForServerCompletion: function(paymentId, txid) {
-                const db = firebase.database();
-                db.ref('users/' + user.uid + '/balance').transaction((current) => {
+                // Nạp xong thì cộng 10 Pi vào sổ cái Firebase của mầy
+                firebase.database().ref('users/' + user.uid + '/balance').transaction((current) => {
                     return (current || 0) + 10;
                 });
-                alert("✅ Ngon lành Nhi ơi! 10 Pi đã vào vườn.");
-                location.reload();
+                alert("✅ Thành công! 10 Pi đã vào túi mầy rồi đó Nhi.");
+                location.reload(); 
             },
-            onCancel: function(paymentId) { alert("❌ Mầy hủy nạp rồi nha!"); },
-            onError: function(error, payment) { alert("❌ Lỗi nạp: " + error.message); }
+            onCancel: function() { alert("❌ Huỷ lệnh nạp rồi!"); },
+            onError: function(err) { alert("❌ Lỗi SDK: " + err.message); }
         });
-    } catch (err) {
-        alert("❌ Lỗi SDK: " + err.message);
+    } catch (e) {
+        alert("❌ Lỗi kết nối SDK: " + e.message);
     }
 }
 </script>

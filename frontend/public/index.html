@@ -3,70 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BONSAI PI 99</title>
+    <title>BONSAI PI 224</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { background-color: #1a472a; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .card { border: 2px solid gold; display: inline-block; padding: 20px; border-radius: 15px; background: rgba(0,0,0,0.5); }
+        .card { border: 2px solid gold; display: inline-block; padding: 20px; border-radius: 15px; background: rgba(0,0,0,0.5); width: 90%; max-width: 400px; }
         input { width: 80%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
-        button { background: gold; color: black; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; margin: 5px; }
-        .btn-nap { background: #28a745; color: white; }
-        .btn-out { background: #dc3545; color: white; margin-top: 20px; }
+        button { background: gold; color: black; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; margin: 5px; width: 80%; }
+        .btn-nap { background: #28a745; color: white; margin-top: 15px; }
+        .btn-out { background: #dc3545; color: white; margin-top: 20px; width: auto; padding: 5px 15px; }
     </style>
 </head>
 <body>
-
     <div class="card">
-        <h1>🌳 BONSAI PI 99 🌳</h1>
-
-        <div id="auth-box" style="display: block;">
-            <p>Hệ thống quản lý vườn kiểng</p>
-            <input type="email" id="email" placeholder="Nhập Gmail nghệ nhân"><br>
-            <input type="password" id="password" placeholder="Mật khẩu bảo mật"><br>
+        <h1>🌳 BONSAI PI 224 🌳</h1>
+        
+        <div id="auth-box">
+            <p>Hệ thống quản lý vườn 224</p>
+            <input type="email" id="email" placeholder="Gmail nghệ nhân"><br>
+            <input type="password" id="password" placeholder="Mật khẩu"><br>
             <button onclick="dangKy()">ĐĂNG KÝ HỘI VIÊN</button>
             <button onclick="dangNhap()" style="background: #28a745; color: white;">VÀO VƯỜN</button>
         </div>
 
         <div id="game-lobby" style="display: none;">
             <h2 id="wel-msg">Chào nghệ nhân!</h2>
-            <div style="border: 2px solid #28a745; padding: 15px; margin: 10px;">
-                <p>Số dư tài khoản: <span id="balance" style="font-weight: bold; color: gold;">0</span> Pi</p>
-                <button class="btn-nap" onclick="napPi()">NẠP 10 PI ĐỂ CHĂM CÂY</button>
+            <div style="border: 2px solid #28a745; padding: 15px; border-radius: 10px;">
+                <p>Số dư tài khoản: <span id="balance" style="color: gold; font-weight: bold; font-size: 1.2em;">0</span> Pi</p>
+                <button class="btn-nap" onclick="napPi()">NẠP 10 PI CHĂM CÂY</button>
             </div>
             <button class="btn-out" onclick="dangXuat()">RỜI VƯỜN</button>
         </div>
     </div>
 
     <script>
-    // 1. Cấu hình Firebase (Nhi nhớ lấy apiKey từ Firebase Console dán vào đây)
+    // 1. Cấu hình Firebase dự án bonsaipi224 của Nhi
     const firebaseConfig = {
-        apiKey: "kzvi6npd3ils0ho0xyqs2otg8bcfotam9bgnqkoeatwxibb69vvlwdj8ehsf9d1e", 
-        authDomain: "bonsaipi99.firebaseapp.com",
-        databaseURL: "https://bonsaipi99-default-rtdb.firebaseio.com",
-        projectId: "bonsaipi99",
-        storageBucket: "bonsaipi99.firebasestorage.app",
-        messagingSenderId: "119041498462",
-        appId: "1:119041498462:web:5b35dc57bjeb6b49afb80f"
+        apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",
+        authDomain: "bonsaipi224.firebaseapp.com",
+        databaseURL: "https://bonsaipi224-default-rtdb.firebaseio.com",
+        projectId: "bonsaipi224",
+        storageBucket: "bonsaipi224.firebasestorage.app",
+        messagingSenderId: "818801429743",
+        appId: "1:818801429743:web:27ed0c854b8be5c8a95f1a"
     };
 
-    // 2. Khởi tạo
+    // Khởi tạo Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+
+    // Khởi tạo Pi SDK
     const Pi = window.Pi;
     Pi.init({ version: "2.0", sandbox: false });
 
-    // 3. TỰ ĐỘNG GHI NHỚ NGƯỜI DÙNG (onAuthStateChanged)
+    // 2. LỆNH GHI NHỚ: Tự động mở cửa vườn nếu đã đăng nhập từ trước
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('auth-box').style.display = 'none';
             document.getElementById('game-lobby').style.display = 'block';
-            document.getElementById('wel-msg').innerText = "Chào nghệ nhân: " + user.email;
+            document.getElementById('wel-msg').innerText = "Nghệ nhân: " + user.email;
             
-            // Lấy số dư từ Realtime Database
+            // Lấy số dư Pi tự động cập nhật từ Database
             db.ref('users/' + user.uid + '/balance').on('value', (snap) => {
                 document.getElementById('balance').innerText = snap.val() || 0;
             });
@@ -76,47 +77,43 @@
         }
     });
 
-    // 4. Các hàm chức năng
+    // 3. Các hàm chức năng
     function dangKy() {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
-        auth.createUserWithEmailAndPassword(email, pass)
-            .then((res) => {
-                db.ref('users/' + res.user.uid).set({ email: email, balance: 0 });
-                alert("Đã đăng ký thành công hội viên!");
-            })
-            .catch(e => alert("Lỗi đăng ký: " + e.message));
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        auth.createUserWithEmailAndPassword(e, p).then(res => {
+            db.ref('users/' + res.user.uid).set({ email: e, balance: 0 });
+            alert("Đã đăng ký thành công!");
+        }).catch(err => alert("Lỗi: " + err.message));
     }
 
     function dangNhap() {
-        const email = document.getElementById('Mhhieu224@gmail.com').value;
-        const pass = document.getElementById('Minhchau1994$').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(e => alert("Sai thông tin rồi Nhi ơi!"));
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        auth.signInWithEmailAndPassword(e, p).catch(err => alert("Sai thông tin rồi Nhi!"));
     }
 
     function dangXuat() {
         auth.signOut().then(() => location.reload());
     }
 
-    // 5. GỌI SDK PI ĐỂ NẠP TIỀN
+    // 4. Lệnh nạp Pi sử dụng mã Key mầy gửi
     async function napPi() {
-        if (!auth.currentUser) return alert("Mầy chưa vào vườn mà nạp cái gì?");
+        if (!auth.currentUser) return alert("Mầy chưa vào vườn!");
         try {
             const payment = await Pi.createPayment({
                 amount: 10,
-                memo: "Nạp 10 Pi chăm Mai Bonsai 99",
-                metadata: { uid: auth.currentUser.uid }
+                memo: "Nạp Pi vườn 224",
+                metadata: { uid: auth.currentUser.uid, key: "kzvi6npd3ils0ho0xyqs2otg8bcfotam9bgnqkoeatwxibb69vvlwdj8ehsf9d1e" }
             }, {
                 onReadyForServerApproval: (id) => fetch('/api/approve', { method: 'POST', body: JSON.stringify({id}) }),
                 onReadyForServerCompletion: (id, txid) => {
-                    // Cộng tiền trực tiếp vào tài khoản
+                    // Cộng tiền vào Database khi nạp xong
                     db.ref('users/' + auth.currentUser.uid + '/balance').transaction(c => (c || 0) + 10);
-                    alert("✅ Ngon lành! Đã nạp xong 10 Pi.");
-                },
-                onCancel: () => alert("❌ Đã hủy lệnh nạp."),
-                onError: (e) => alert("❌ Lỗi: " + e.message)
+                    alert("✅ Đã nạp xong 10 Pi!");
+                }
             });
-        } catch (e) { alert("Lỗi SDK: " + e.message); }
+        } catch (e) { alert("Lỗi Pi: " + e.message); }
     }
     </script>
 </body>

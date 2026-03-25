@@ -205,6 +205,42 @@ async function napPi() {
           onError: function(err) { alert("❌ Lỗi nạp: " + err.message); }
       });
     }
-  </script>
-</body>
-</html> giờ sữa nút nạp để hoàn thành bước 10 pi browser nha
+ <script>
+async function napPi() {
+    const Pi = window.Pi;
+    const user = firebase.auth().currentUser;
+
+    if (!user) {
+        return alert("Nhi ơi, mầy chưa đăng nhập nên tao không biết nạp tiền cho ai!");
+    }
+
+    try {
+        const payment = await Pi.createPayment({
+            amount: 10,
+            memo: "Nạp 10 Pi nuôi Bonsai 99",
+            metadata: { uid: user.uid, gmail: user.email }
+        }, {
+            onReadyForServerApproval: function(paymentId) {
+                // Báo server duyệt lệnh
+                fetch('/api/approve', {
+                    method: 'POST',
+                    body: JSON.stringify({ paymentId: paymentId })
+                });
+            },
+            onReadyForServerCompletion: function(paymentId, txid) {
+                // Cộng tiền vào Firebase
+                const db = firebase.database();
+                db.ref('users/' + user.uid + '/balance').transaction((current) => {
+                    return (current || 0) + 10;
+                });
+                alert("✅ Ngon lành! Đã nạp xong 10 Pi.");
+                location.reload(); 
+            },
+            onCancel: function() { alert("❌ Đã hủy nạp!"); },
+            onError: function(err) { alert("❌ Lỗi: " + err.message); }
+        });
+    } catch (e) {
+        alert("❌ Lỗi SDK: " + e.message);
+    }
+}
+</script>

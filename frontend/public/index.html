@@ -35,93 +35,14 @@ button { padding:10px; margin:5px; }
 </div>
 
 <script>
-/* FIREBASE CONFIG */
-const firebaseConfig = {
-  apiKey: "kzvi6npd3ils0ho0xyqs2otg8bcfotam9bgnqkoeatwxibb69vvlwdj8ehsf9d1e",
-  authDomain: "app.firebaseapp.com",
-  databaseURL: "https://app-default-rtdb.firebaseio.com",
-  projectId: "app",
-};
-firebase.initializeApp(firebaseConfig);
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-const auth = firebase.auth();
-const db = firebase.database();
-
-/* PI INIT */
-Pi.init({ version: "2.0", sandbox: true });
-
-/* AUTH */
-function register(){
-  auth.createUserWithEmailAndPassword(val("email"), val("pass"))
-  .then(res=>{
-    db.ref("users/"+res.user.uid).set({balance:0});
-    alert("OK");
-  })
-  .catch(e=>alert(e.message));
-}
-
-function login(){
-  auth.signInWithEmailAndPassword(val("email"), val("pass"))
-  .catch(e=>alert(e.message));
-}
-
-function logout(){
-  auth.signOut();
-}
-
-/* UI */
-auth.onAuthStateChanged(user=>{
-  if(user){
-    show("app"); hide("auth");
-    text("user","Xin chào: "+user.email);
-
-    db.ref("users/"+user.uid+"/balance")
-    .on("value",snap=>{
-      text("balance", snap.val() || 0);
-    });
-  } else {
-    show("auth"); hide("app");
-  }
-});
-
-/* PAYMENT */
-async function pay(){
-  const user = auth.currentUser;
-  if(!user) return alert("Chưa login");
-
-  try{
-    await Pi.createPayment({
-      amount:1,
-      memo:"Nap Pi",
-      metadata:{uid:user.uid}
-    },{
-      onReadyForServerApproval: pid=>{
-        console.log("approve", pid);
-      },
-      onReadyForServerCompletion:(pid,txid)=>{
-        db.ref("users/"+user.uid+"/balance")
-        .transaction(x=>(x||0)+1);
-        alert("OK");
-      },
-      onCancel:()=>alert("Hủy"),
-      onError:e=>alert(e.message)
-    });
-  }catch(e){
-    alert(e.message);
-  }
-}
-
-/* HELPER */
-function val(id){ return document.getElementById(id).value }
-function text(id,t){ document.getElementById(id).innerText=t }
-function show(id){ document.getElementById(id).style.display="block" }
-function hide(id){ document.getElementById(id).style.display="none" }
-
-</script>
 <script>
-// 1. Khai báo chìa khóa (Nhi lấy cái apiKey thật của mầy dán vào đây nha)
+// 2. Cấu hình chìa khóa (Nhi copy đúng cái apiKey từ Firebase Console dán vô đây)
 const firebaseConfig = {
-  apiKey: "AIZA...", 
+  apiKey: "AIzaSyB-vX_S2_XXXXX_YOUR_KEY", 
   authDomain: "bonsaipi99.firebaseapp.com",
   databaseURL: "https://bonsaipi99-default-rtdb.firebaseio.com",
   projectId: "bonsaipi99",
@@ -130,44 +51,77 @@ const firebaseConfig = {
   appId: "1:119041498462:web:5b35dc57bjeb6b49afb80f"
 };
 
-// 2. Nổ máy Firebase
+// 3. Khởi tạo hệ thống
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// 3. ĐÂY LÀ ĐOẠN "GHI NHỚ": Tự động vào vườn nếu đã đăng nhập
+// 4. LỆNH GHI NHỚ: Tự động mở cửa vườn
 auth.onAuthStateChanged((user) => {
+    const authBox = document.getElementById('auth-box');
+    const lobby = document.getElementById('game-lobby');
+    
     if (user) {
-        document.getElementById('auth-box').style.display = 'none';
-        document.getElementById('game-lobby').style.display = 'block';
+        // Nếu mầy đã đăng nhập rồi, giấu khung đăng nhập đi
+        authBox.style.display = 'none';
+        lobby.style.display = 'block';
         document.getElementById('wel-msg').innerText = "Chào nghệ nhân: " + user.email;
         
-        // Tự lấy số dư từ Firebase hiện lên màn hình
+        // Tự động lấy số dư Pi từ Database hiện lên
         db.ref('users/' + user.uid + '/balance').on('value', (snap) => {
             document.getElementById('balance').innerText = snap.val() || 0;
         });
     } else {
-        document.getElementById('auth-box').style.display = 'block';
-        document.getElementById('game-lobby').style.display = 'none';
+        // Nếu chưa đăng nhập, hiện khung bắt nhập Gmail
+        authBox.style.display = 'block';
+        lobby.style.display = 'none';
     }
 });
 
-// 4. Hàm nạp Pi (gọi SDK Pi Browser)
+// 5. Hàm Đăng ký hội viên
+function dangKy() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+    auth.createUserWithEmailAndPassword(email, pass)
+        .then((userCredential) => {
+            // Tạo sẵn cái hũ đựng Pi trong Database
+            db.ref('users/' + userCredential.user.uid).set({ email: email, balance: 0 });
+            alert("Đã cấp thẻ hội viên cho Nhi!");
+        })
+        .catch((err) => alert("Lỗi: " + err.message));
+}
+
+// 6. Hàm Vào vườn (Đăng nhập)
+function dangNhap() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+    auth.signInWithEmailAndPassword(email, pass).catch(e => alert("Sai mật khẩu rồi mậy!"));
+}
+
+// 7. Hàm Rời vườn (Đăng xuất)
+function dangXuat() {
+    auth.signOut().then(() => location.reload());
+}
+
+// 8. Hàm Nạp 10 Pi (Gọi SDK Pi Browser)
 async function napPi() {
+    if (!window.Pi) return alert("Mở bằng Pi Browser mới nạp được nha!");
     try {
         const payment = await window.Pi.createPayment({
             amount: 10,
-            memo: "Nạp 10 Pi chăm vườn Bonsai 99",
+            memo: "Nạp Pi chăm Mai Bonsai 99",
             metadata: { uid: auth.currentUser.uid }
         }, {
             onReadyForServerApproval: (id) => fetch('/api/approve', { method: 'POST', body: JSON.stringify({id}) }),
             onReadyForServerCompletion: (id, txid) => {
+                // Nạp xong cộng tiền thẳng vào Database
                 db.ref('users/' + auth.currentUser.uid + '/balance').transaction(c => (c || 0) + 10);
-                alert("✅ Đã nạp 10 Pi thành công!");
+                alert("Ngon! Đã nạp xong 10 Pi.");
             }
         });
-    } catch (e) { alert("Lỗi: " + e.message); }
+    } catch (e) { alert("Lỗi nạp: " + e.message); }
 }
 </script>
+
 </body>
 </html>

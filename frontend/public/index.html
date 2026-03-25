@@ -1,156 +1,122 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>BONSAI PI 99</title>
+<meta charset="UTF-8">
+<title>Bonsai Pi</title>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-  <!-- Pi SDK -->
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-  <style>
-    body {
-      background: #0b4e3b;
-      color: white;
-      text-align: center;
-      font-family: Arial;
-      padding-top: 50px;
-    }
-    input, button {
-      padding: 10px;
-      margin: 5px;
-    }
-    #game { display: none; }
-  </style>
+<style>
+body { background:#111; color:white; text-align:center; }
+button { padding:10px; margin:5px; }
+</style>
 </head>
+
 <body>
 
-<h2>🌱 BONSAI PI 99</h2>
+<h2>🌱 Bonsai Pi</h2>
 
-<!-- LOGIN -->
 <div id="auth">
-  <input id="email" placeholder="Email"><br>
-  <input id="password" type="password" placeholder="Password"><br>
-  <button onclick="register()">Đăng ký</button>
-  <button onclick="login()">Đăng nhập</button>
+<input id="email" placeholder="Email"><br><br>
+<input id="pass" type="password" placeholder="Password"><br><br>
+<button onclick="register()">Đăng ký</button>
+<button onclick="login()">Đăng nhập</button>
 </div>
 
-<!-- GAME -->
-<div id="game">
-  <p id="user"></p>
-  <p>Số dư: <span id="balance">0</span> Pi</p>
-  <button onclick="napPi()">Nạp 10 Pi</button>
-  <button onclick="logout()">Thoát</button>
+<div id="app" style="display:none;">
+<p id="user"></p>
+<p>Balance: <span id="balance">0</span> Pi</p>
+<button onclick="pay()">Nạp 1 Pi</button>
+<button onclick="logout()">Đăng xuất</button>
 </div>
 
 <script>
-/* ================== CONFIG ================== */
+/* FIREBASE CONFIG */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+  apiKey: "DAN_KEY_VAO_DAY",
+  authDomain: "app.firebaseapp.com",
+  databaseURL: "https://app-default-rtdb.firebaseio.com",
+  projectId: "app",
 };
-
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.database();
 
-/* ================== PI INIT ================== */
+/* PI INIT */
 Pi.init({ version: "2.0", sandbox: true });
 
-/* ================== REGISTER ================== */
-function register() {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
-
-  auth.createUserWithEmailAndPassword(email, pass)
-    .then(res => {
-      db.ref("users/" + res.user.uid).set({
-        email: email,
-        balance: 0
-      });
-      alert("Đăng ký thành công!");
-    })
-    .catch(err => alert(err.message));
+/* AUTH */
+function register(){
+  auth.createUserWithEmailAndPassword(val("email"), val("pass"))
+  .then(res=>{
+    db.ref("users/"+res.user.uid).set({balance:0});
+    alert("OK");
+  })
+  .catch(e=>alert(e.message));
 }
 
-/* ================== LOGIN ================== */
-function login() {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
-
-  auth.signInWithEmailAndPassword(email, pass)
-    .catch(err => alert(err.message));
+function login(){
+  auth.signInWithEmailAndPassword(val("email"), val("pass"))
+  .catch(e=>alert(e.message));
 }
 
-/* ================== LOGOUT ================== */
-function logout() {
+function logout(){
   auth.signOut();
 }
 
-/* ================== AUTH STATE ================== */
-auth.onAuthStateChanged(user => {
-  if (user) {
-    document.getElementById("auth").style.display = "none";
-    document.getElementById("game").style.display = "block";
+/* UI */
+auth.onAuthStateChanged(user=>{
+  if(user){
+    show("app"); hide("auth");
+    text("user","Xin chào: "+user.email);
 
-    document.getElementById("user").innerText = "Xin chào: " + user.email;
-
-    db.ref("users/" + user.uid + "/balance")
-      .on("value", snap => {
-        document.getElementById("balance").innerText = snap.val() || 0;
-      });
-
+    db.ref("users/"+user.uid+"/balance")
+    .on("value",snap=>{
+      text("balance", snap.val() || 0);
+    });
   } else {
-    document.getElementById("auth").style.display = "block";
-    document.getElementById("game").style.display = "none";
+    show("auth"); hide("app");
   }
 });
 
-/* ================== PAYMENT ================== */
-async function napPi() {
+/* PAYMENT */
+async function pay(){
   const user = auth.currentUser;
+  if(!user) return alert("Chưa login");
 
-  if (!user) {
-    alert("Chưa đăng nhập!");
-    return;
-  }
-
-  try {
+  try{
     await Pi.createPayment({
-      amount: 10,
-      memo: "Nạp Pi Bonsai",
-      metadata: { uid: user.uid }
-    }, {
-      onReadyForServerApproval: function(paymentId) {
-        console.log("Approve:", paymentId);
+      amount:1,
+      memo:"Nap Pi",
+      metadata:{uid:user.uid}
+    },{
+      onReadyForServerApproval: pid=>{
+        console.log("approve", pid);
       },
-
-      onReadyForServerCompletion: function(paymentId, txid) {
-        db.ref("users/" + user.uid + "/balance")
-          .transaction(v => (v || 0) + 10);
-
-        alert("Nạp Pi thành công!");
+      onReadyForServerCompletion:(pid,txid)=>{
+        db.ref("users/"+user.uid+"/balance")
+        .transaction(x=>(x||0)+1);
+        alert("OK");
       },
-
-      onCancel: function() {
-        alert("Đã hủy giao dịch");
-      },
-
-      onError: function(err) {
-        alert("Lỗi: " + err);
-      }
+      onCancel:()=>alert("Hủy"),
+      onError:e=>alert(e.message)
     });
-
-  } catch (e) {
-    alert("Crash: " + e.message);
+  }catch(e){
+    alert(e.message);
   }
 }
+
+/* HELPER */
+function val(id){ return document.getElementById(id).value }
+function text(id,t){ document.getElementById(id).innerText=t }
+function show(id){ document.getElementById(id).style.display="block" }
+function hide(id){ document.getElementById(id).style.display="none" }
+
 </script>
 
 </body>

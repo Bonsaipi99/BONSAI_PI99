@@ -97,29 +97,27 @@
         auth.signOut().then(() => location.reload());
     }
 
-   // Chỉ giữ duy nhất MỘT hàm napPi sạch sẽ này thôi
-async function napPi() {
-  if (!auth.currentUser) return alert("Nghệ nhân hãy đăng nhập trước khi nạp!");
+  async function napPi() {
+  if (!auth.currentUser) return alert("Nghệ nhân hãy đăng nhập trước!");
   
   try {
-    // Tự kích hoạt Pi nếu nó chưa sẵn sàng
-    if (!window.Pi.initialized) { 
-      await Pi.init({ version: "2.0", sandbox: true }); 
+    // Tự động kiểm tra và khởi tạo Pi khi bấm nút
+    if (window.Pi && !window.Pi.initialized) {
+      await Pi.init({ version: "2.0", sandbox: true });
     }
 
     const payment = await Pi.createPayment({
       amount: 10,
-      memo: "Nap Pi cham cay 224",
-      metadata: { uid: auth.currentUser.uid, key: "kzvi6npd31..." } 
+      memo: "Nạp 10 Pi vào vườn Bonsai 224",
+      metadata: { uid: auth.currentUser.uid, key: "kzvi6npd31..." }
     }, {
       onReadyForServerApproval: (id) => fetch('/api/approve', { method: 'POST', body: JSON.stringify({id}) }),
-      onReadyForServerApproval: (id) => console.log("Đang chờ duyệt: ", id),
       onReadyForServerCompletion: (id, txid) => {
           db.ref('users/' + auth.currentUser.uid + '/balance').transaction(c => (c || 0) + 10);
-          alert("✅ Chúc mừng nghệ nhân đã nạp thành công 10 PI!");
+          alert("✅ Đã nạp thành công 10 PI!");
       }
     });
   } catch (e) {
-    alert("Lỗi kết nối Pi: " + e.message);
+    alert("Lỗi nạp Pi: " + e.message);
   }
 }

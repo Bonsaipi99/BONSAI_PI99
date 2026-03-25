@@ -56,10 +56,10 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
- // Khởi tạo Pi SDK
+    // Khởi tạo Pi SDK
     const Pi = window.Pi;
-    Pi.init({ version: "2.0", sandbox: false }); 
-    
+    Pi.init({ version: "2.0", sandbox: false });
+
     // 2. LỆNH GHI NHỚ: Tự động mở cửa vườn nếu đã đăng nhập từ trước
     auth.onAuthStateChanged((user) => {
         if (user) {
@@ -75,6 +75,7 @@
             document.getElementById('auth-box').style.display = 'block';
             document.getElementById('game-lobby').style.display = 'none';
         }
+    });
 
     // 3. Các hàm chức năng
     function dangKy() {
@@ -96,7 +97,7 @@
         auth.signOut().then(() => location.reload());
     }
 
-   // 4. Lệnh nạp Pi sử dụng mã Key mầy gửi
+    // 4. Lệnh nạp Pi sử dụng mã Key mầy gửi
     async function napPi() {
         if (!auth.currentUser) return alert("Mầy chưa vào vườn!");
         try {

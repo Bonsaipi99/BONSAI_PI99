@@ -102,6 +102,22 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 // 3. Khởi tạo Pi SDK
+    // Tự động nhận diện chủ vườn đã đăng nhập chưa
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        document.getElementById('auth-box').style.display = 'none';
+        document.getElementById('game-lobby').style.display = 'block';
+        document.getElementById('wel-msg').innerText = "Chào nghệ nhân: " + user.email;
+        
+        // Lấy số Pi từ Firebase hiện lên màn hình
+        db.ref('users/' + user.uid + '/balance').on('value', (snapshot) => {
+            document.getElementById('balance').innerText = snapshot.val() || 0;
+        });
+    } else {
+        document.getElementById('auth-box').style.display = 'block';
+        document.getElementById('game-lobby').style.display = 'none';
+    }
+});
 const Pi = window.Pi;
 Pi.init({ version: "2.0", sandbox: false });
 

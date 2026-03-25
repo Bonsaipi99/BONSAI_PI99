@@ -118,6 +118,54 @@ function show(id){ document.getElementById(id).style.display="block" }
 function hide(id){ document.getElementById(id).style.display="none" }
 
 </script>
+<script>
+// 1. Khai báo chìa khóa (Nhi lấy cái apiKey thật của mầy dán vào đây nha)
+const firebaseConfig = {
+  apiKey: "AIZA...", 
+  authDomain: "bonsaipi99.firebaseapp.com",
+  databaseURL: "https://bonsaipi99-default-rtdb.firebaseio.com",
+  projectId: "bonsaipi99",
+  storageBucket: "bonsaipi99.firebasestorage.app",
+  messagingSenderId: "119041498462",
+  appId: "1:119041498462:web:5b35dc57bjeb6b49afb80f"
+};
 
-</body>
-</html>
+// 2. Nổ máy Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+// 3. ĐÂY LÀ ĐOẠN "GHI NHỚ": Tự động vào vườn nếu đã đăng nhập
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        document.getElementById('auth-box').style.display = 'none';
+        document.getElementById('game-lobby').style.display = 'block';
+        document.getElementById('wel-msg').innerText = "Chào nghệ nhân: " + user.email;
+        
+        // Tự lấy số dư từ Firebase hiện lên màn hình
+        db.ref('users/' + user.uid + '/balance').on('value', (snap) => {
+            document.getElementById('balance').innerText = snap.val() || 0;
+        });
+    } else {
+        document.getElementById('auth-box').style.display = 'block';
+        document.getElementById('game-lobby').style.display = 'none';
+    }
+});
+
+// 4. Hàm nạp Pi (gọi SDK Pi Browser)
+async function napPi() {
+    try {
+        const payment = await window.Pi.createPayment({
+            amount: 10,
+            memo: "Nạp 10 Pi chăm vườn Bonsai 99",
+            metadata: { uid: auth.currentUser.uid }
+        }, {
+            onReadyForServerApproval: (id) => fetch('/api/approve', { method: 'POST', body: JSON.stringify({id}) }),
+            onReadyForServerCompletion: (id, txid) => {
+                db.ref('users/' + auth.currentUser.uid + '/balance').transaction(c => (c || 0) + 10);
+                alert("✅ Đã nạp 10 Pi thành công!");
+            }
+        });
+    } catch (e) { alert("Lỗi: " + e.message); }
+}
+</script>

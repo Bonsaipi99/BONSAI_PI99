@@ -97,24 +97,29 @@
         auth.signOut().then(() => location.reload());
     }
 
-    // 4. Lệnh nạp Pi sử dụng mã Key mầy gửi
-    async function napPi() {
-        if (!auth.currentUser) return alert("Mầy chưa vào vườn!");
-        try {
-            const payment = await Pi.createPayment({
-                amount: 10,
-                memo: "Nạp Pi vườn 224",
-                metadata: { uid: auth.currentUser.uid, key: "kzvi6npd3ils0ho0xyqs2otg8bcfotam9bgnqkoeatwxibb69vvlwdj8ehsf9d1e" }
-            }, {
-                onReadyForServerApproval: (id) => fetch('/api/approve', { method: 'POST', body: JSON.stringify({id}) }),
-                onReadyForServerCompletion: (id, txid) => {
-                    // Cộng tiền vào Database khi nạp xong
-                    db.ref('users/' + auth.currentUser.uid + '/balance').transaction(c => (c || 0) + 10);
-                    alert("✅ Đã nạp xong 10 Pi!");
-                }
-            });
-        } catch (e) { alert("Lỗi Pi: " + e.message); }
+   // Chỉ giữ duy nhất MỘT hàm napPi sạch sẽ này thôi
+async function napPi() {
+  if (!auth.currentUser) return alert("Nghệ nhân hãy đăng nhập trước khi nạp!");
+  
+  try {
+    // Tự kích hoạt Pi nếu nó chưa sẵn sàng
+    if (!window.Pi.initialized) { 
+      await Pi.init({ version: "2.0", sandbox: true }); 
     }
-    </script>
-</body>
-</html>
+
+    const payment = await Pi.createPayment({
+      amount: 10,
+      memo: "Nap Pi cham cay 224",
+      metadata: { uid: auth.currentUser.uid, key: "kzvi6npd31..." } 
+    }, {
+      onReadyForServerApproval: (id) => fetch('/api/approve', { method: 'POST', body: JSON.stringify({id}) }),
+      onReadyForServerApproval: (id) => console.log("Đang chờ duyệt: ", id),
+      onReadyForServerCompletion: (id, txid) => {
+          db.ref('users/' + auth.currentUser.uid + '/balance').transaction(c => (c || 0) + 10);
+          alert("✅ Chúc mừng nghệ nhân đã nạp thành công 10 PI!");
+      }
+    });
+  } catch (e) {
+    alert("Lỗi kết nối Pi: " + e.message);
+  }
+}

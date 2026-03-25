@@ -56,14 +56,6 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-  // 1. Đợi thư viện Pi tải xong rồi mới chạy lệnh
-window.onload = function() {
-  if (window.Pi) {
-    Pi.init({ version: "2.0", sandbox: true });
-    console.log("Pi SDK đã sẵn sàng!");
-  } else {
-    alert("Không tìm thấy thư viện Pi, hãy mở bằng Pi Browser!");
-  }
  // Khởi tạo Pi SDK
     const Pi = window.Pi;
     Pi.init({ version: "2.0", sandbox: false }); 

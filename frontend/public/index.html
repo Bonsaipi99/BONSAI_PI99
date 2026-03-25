@@ -64,7 +64,10 @@ window.onload = function() {
   } else {
     alert("Không tìm thấy thư viện Pi, hãy mở bằng Pi Browser!");
   }
-
+ // Khởi tạo Pi SDK
+    const Pi = window.Pi;
+    Pi.init({ version: "2.0", sandbox: false }); 
+    
     // 2. LỆNH GHI NHỚ: Tự động mở cửa vườn nếu đã đăng nhập từ trước
     auth.onAuthStateChanged((user) => {
         if (user) {

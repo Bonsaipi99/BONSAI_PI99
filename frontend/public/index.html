@@ -1,260 +1,157 @@
-<div id="auth-box" style="text-align: center; background-color: #1a472a; color: white; padding: 30px; border-radius: 15px;">
-    <h1>🌳 BONSAI PI 99 🌳</h1>
-    <p>Hệ thống quản lý vườn kiểng</p>
-    <input type="email" id="email" placeholder="Nhập Gmail nghệ nhân"><br><br>
-    <input type="password" id="password" placeholder="Mật khẩu bảo mật"><br><br>
-    <button onclick="dangKy()" style="background: #ffc107; padding: 10px;">ĐĂNG KÝ HỘI VIÊN</button>
-    <button onclick="dangNhap()" style="background: #28a745; color: white; padding: 10px;">VÀO VƯỜN</button>
-</div>
-
-<div id="game-lobby" style="display: none; text-align: center;">
-    <h2>✅ ĐÃ VÀO VƯỜN THÀNH CÔNG</h2>
-    <p id="wel-msg"></p>
-    <div style="border: 2px solid #28a745; padding: 20px; margin: 10px;">
-        <p>Số dư tài khoản: <span id="balance">0</span> Pi</p>
-        <button onclick="napPi()" style="background: #ffc107; font-weight: bold;">NẠP 10 PI ĐỂ CHĂM CÂY</button>
-    </div>
-    <button onclick="dangXuat()">RỜI VƯỜN</button>
-</div>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<script>
-// 2. Dán chìa khóa Firebase mầy vừa lấy vào đây
-const firebaseConfig = {
-  apiKey: "AIzaSyBc4oPPt2AQdn6AW85DRpQSIuMyK1oJDlQ",
-  authDomain: "bonsaipi99.firebaseapp.com",
-  databaseURL: "https://bonsaipi99-default-rtdb.firebaseio.com",
-  projectId: "bonsaipi99",
-  storageBucket: "bonsaipi99.firebasestorage.app",
-  messagingSenderId: "119041490462",
-  appId: "1:119041490462:web:5635dc57b3eb6b49afb80f",
-  measurementId: "G-W7XQKDGW6X"
-};
-
-// Khởi tạo
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
-
-// 3. Hàm Đăng Ký
-function dangKy() {
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('password').value;
-    
-    if(!email || !pass) return alert("Nhập đủ Gmail với mật khẩu mậy ơi!");
-
-    auth.createUserWithEmailAndPassword(email, pass)
-        .then((userCredential) => {
-            // Lưu Gmail vào Database để không bị mất số dư
-            db.ref('users/' + userCredential.user.uid).set({
-                gmail: email,
-                balance: 0
-            });
-            alert("Đăng ký thành công! Giờ mầy bấm VÀO VƯỜN nha.");
-        })
-        .catch((error) => alert("Lỗi rồi: " + error.message));
-}
-
-// 4. Hàm Đăng Nhập
-function dangNhap() {
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('password').value;
-
-    auth.signInWithEmailAndPassword(email, pass)
-        .then((userCredential) => {
-            document.getElementById('auth-box').style.display = 'none';
-            document.getElementById('game-lobby').style.display = 'block';
-            document.getElementById('wel-msg').innerText = "Chào nghệ nhân: " + email;
-            
-            // Lấy số dư từ Database hiện lên
-            db.ref('users/' + userCredential.user.uid).once('value', (snapshot) => {
-                document.getElementById('balance').innerText = snapshot.val().balance;
-            });
-        })
-        .catch((error) => alert("Sai mật khẩu hoặc Gmail rồi Nhi ơi!"));
-}
-
-// 5. Hàm Đăng Xuất (Thoát là sạch sẽ)
-function dangXuat() {
-    auth.signOut().then(() => { location.reload(); });
-}
-</script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
-<script>
-// 2. Chìa khóa Firebase của mầy (Giữ nguyên cái này)
-const firebaseConfig = {
-  apiKey: "AIzaSyBc4oPPt2AQdn6AW85DRpQSIuMyK1oJDlQ",
-  authDomain: "bonsaipi99.firebaseapp.com",
-  databaseURL: "https://bonsaipi99-default-rtdb.firebaseio.com",
-  projectId: "bonsaipi99",
-  storageBucket: "bonsaipi99.firebasestorage.app",
-  messagingSenderId: "119041490462",
-  appId: "1:119041490462:web:5635dc57b3eb6b49afb80f"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
-
-// 3. Khởi tạo Pi SDK
-    // Tự động nhận diện chủ vườn đã đăng nhập chưa
-firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        document.getElementById('auth-box').style.display = 'none';
-        document.getElementById('game-lobby').style.display = 'block';
-        document.getElementById('wel-msg').innerText = "Chào nghệ nhân: " + user.email;
-        
-        // Lấy số Pi từ Firebase hiện lên màn hình
-        db.ref('users/' + user.uid + '/balance').on('value', (snapshot) => {
-            document.getElementById('balance').innerText = snapshot.val() || 0;
-        });
-    } else {
-        document.getElementById('auth-box').style.display = 'block';
-        document.getElementById('game-lobby').style.display = 'none';
-    }
-});
-const Pi = window.Pi;
-Pi.init({ version: "2.0", sandbox: false });
-
-// 4. Hàm Nạp 10 Pi "Thần Thánh"
-async function napPi() {
-    // Kiểm tra xem nghệ nhân đã đăng nhập chưa
-    const user = auth.currentUser;
-    if (!user) {
-        alert("Nhi ơi, mầy chưa ĐĂNG NHẬP thì nạp tiền cho ai hưởng?");
-        return;
-    }
-
-    try {
-        const payment = await Pi.createPayment({
-            amount: 10,
-            memo: "Nạp 10 Pi vào vườn Bonsai 99",
-            metadata: { uid: user.uid, gmail: user.email }
-        }, {
-            // Bước quan trọng: Báo cho server Vercel của mầy duyệt lệnh
-            onReadyForServerApproval: function(paymentId) {
-                console.log("Đang chờ server duyệt lệnh: ", paymentId);
-                // Mầy cần gọi tới file api/approve của mầy ở đây
-                fetch('/api/approve', {
-                    method: 'POST',
-                    body: JSON.stringify({ paymentId: paymentId })
-                });
-            },
-            onReadyForServerCompletion: function(paymentId, txid) {
-                console.log("Nạp xong rồi mậy ơi! TXID: ", txid);
-                // Cộng tiền vào Firebase cho nghệ nhân
-                db.ref('users/' + user.uid + '/balance').transaction((current) => {
-                    return (current || 0) + 10;
-                });
-                alert("✅ Chúc mừng Nhi! Đã nạp 10 Pi thành công vào " + user.email);
-            },
-            onCancel: function(paymentId) { alert("❌ Mầy tiếc tiền hả Nhi? Lệnh đã hủy."); },
-            onError: function(error, payment) { alert("❌ Lỗi nạp: " + error.message); }
-        });
-    } catch (err) {
-        alert("❌ Crash: " + err.message);
-    }
-}
-</script>  
-
-</div> 
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>BONSAI PI 99</title>
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-  <style>
-    body { background: #064e3b; color: gold; text-align: center; font-family: sans-serif; padding-top: 80px; }
-    .card { border: 2px solid gold; display: inline-block; padding: 20px; border-radius: 15px; background: rgba(0,0,0,0.2); }
-    button { background: gold; color: black; padding: 15px 25px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-size: 18px; margin-top: 20px; }
-  </style>
+  <meta charset="UTF-8">
+  <title>BONSAI PI 99</title>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <!-- Pi SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+  <style>
+    body {
+      background: #0b4e3b;
+      color: white;
+      text-align: center;
+      font-family: Arial;
+      padding-top: 50px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+    }
+    #game { display: none; }
+  </style>
 </head>
 <body>
-  </div> </body>
-</html>
 
-  <script>
-    window.onload = function () {
-      if (!window.Pi) {
-        document.getElementById("status").innerText = "❌ Lỗi: Mở bằng Pi Browser nha mậy!";
-        return;
-      }
+<h2>🌱 BONSAI PI 99</h2>
 
-      const Pi = window.Pi;
-      try {
-        // BUỘC PHẢI INIT TRƯỚC
-        Pi.init({ version: "2.0", sandbox: false });
-        
-        // ĐỢI 1 GIÂY RỒI MỚI LOGIN
-        setTimeout(function() {
-          Pi.authenticate(['username', 'payments'], function(p){})
-            .then(function(auth) {
-              document.getElementById("status").innerText = "✅ Nghệ nhân: " + auth.user.username;
-            })
-            .catch(function(err) {
-              document.getElementById("status").innerText = "❌ Lỗi: " + err.message;
-            });
-        }, 1000);
-      } catch (e) {
-        document.getElementById("status").innerText = "❌ Crash: " + e.message;
-      }
-    };
+<!-- LOGIN -->
+<div id="auth">
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+  <button onclick="register()">Đăng ký</button>
+  <button onclick="login()">Đăng nhập</button>
+</div>
 
-    function napPi() {
-      if (!window.Pi) return;
-      window.Pi.createPayment({
-          amount: 10,
-          memo: "Nap Pi Bonsai 99",
-          metadata: { type: "deposit" }
-      }, {
-          onReadyForServerApproval: function(id) { console.log("Duyet: " + id); },
-          onReadyForServerCompletion: function(id, tx) { alert("✅ Thành công!"); },
-          onCancel: function() { alert("❌ Huỷ"); },
-          onError: function(err) { alert("❌ Lỗi nạp: " + err.message); }
-      });
-    }
- <script>
+<!-- GAME -->
+<div id="game">
+  <p id="user"></p>
+  <p>Số dư: <span id="balance">0</span> Pi</p>
+  <button onclick="napPi()">Nạp 10 Pi</button>
+  <button onclick="logout()">Thoát</button>
+</div>
+
+<script>
+/* ================== CONFIG ================== */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.database();
+
+/* ================== PI INIT ================== */
+Pi.init({ version: "2.0", sandbox: true });
+
+/* ================== REGISTER ================== */
+function register() {
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
+
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(res => {
+      db.ref("users/" + res.user.uid).set({
+        email: email,
+        balance: 0
+      });
+      alert("Đăng ký thành công!");
+    })
+    .catch(err => alert(err.message));
+}
+
+/* ================== LOGIN ================== */
+function login() {
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
+
+  auth.signInWithEmailAndPassword(email, pass)
+    .catch(err => alert(err.message));
+}
+
+/* ================== LOGOUT ================== */
+function logout() {
+  auth.signOut();
+}
+
+/* ================== AUTH STATE ================== */
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("game").style.display = "block";
+
+    document.getElementById("user").innerText = "Xin chào: " + user.email;
+
+    db.ref("users/" + user.uid + "/balance")
+      .on("value", snap => {
+        document.getElementById("balance").innerText = snap.val() || 0;
+      });
+
+  } else {
+    document.getElementById("auth").style.display = "block";
+    document.getElementById("game").style.display = "none";
+  }
+});
+
+/* ================== PAYMENT ================== */
 async function napPi() {
-    const Pi = window.Pi;
-    const user = firebase.auth().currentUser;
+  const user = auth.currentUser;
 
-    if (!user) {
-        return alert("Nhi ơi, mầy chưa đăng nhập nên tao không biết nạp tiền cho ai!");
-    }
+  if (!user) {
+    alert("Chưa đăng nhập!");
+    return;
+  }
 
-    try {
-        const payment = await Pi.createPayment({
-            amount: 10,
-            memo: "Nạp 10 Pi nuôi Bonsai 99",
-            metadata: { uid: user.uid, gmail: user.email }
-        }, {
-            onReadyForServerApproval: function(paymentId) {
-                // Báo server duyệt lệnh
-                fetch('/api/approve', {
-                    method: 'POST',
-                    body: JSON.stringify({ paymentId: paymentId })
-                });
-            },
-            onReadyForServerCompletion: function(paymentId, txid) {
-                // Cộng tiền vào Firebase
-                const db = firebase.database();
-                db.ref('users/' + user.uid + '/balance').transaction((current) => {
-                    return (current || 0) + 10;
-                });
-                alert("✅ Ngon lành! Đã nạp xong 10 Pi.");
-                location.reload(); 
-            },
-            onCancel: function() { alert("❌ Đã hủy nạp!"); },
-            onError: function(err) { alert("❌ Lỗi: " + err.message); }
-        });
-    } catch (e) {
-        alert("❌ Lỗi SDK: " + e.message);
-    }
+  try {
+    await Pi.createPayment({
+      amount: 10,
+      memo: "Nạp Pi Bonsai",
+      metadata: { uid: user.uid }
+    }, {
+      onReadyForServerApproval: function(paymentId) {
+        console.log("Approve:", paymentId);
+      },
+
+      onReadyForServerCompletion: function(paymentId, txid) {
+        db.ref("users/" + user.uid + "/balance")
+          .transaction(v => (v || 0) + 10);
+
+        alert("Nạp Pi thành công!");
+      },
+
+      onCancel: function() {
+        alert("Đã hủy giao dịch");
+      },
+
+      onError: function(err) {
+        alert("Lỗi: " + err);
+      }
+    });
+
+  } catch (e) {
+    alert("Crash: " + e.message);
+  }
 }
 </script>
+
+</body>
+</html>

@@ -145,24 +145,7 @@ async function napPi() {
     }
 }
 </script>  
-// Đoạn code này giúp tự động vào vườn nếu đã đăng nhập từ trước
-firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        // Nếu đã đăng nhập rồi (ghi nhớ), tự động hiện giao diện vườn luôn
-        document.getElementById('auth-box').style.display = 'none';
-        document.getElementById('game-lobby').style.display = 'block';
-        document.getElementById('wel-msg').innerText = "Chào nghệ nhân: " + user.email;
-        
-        // Cập nhật số dư từ Firebase lên màn hình
-        firebase.database().ref('users/' + user.uid + '/balance').on('value', (snapshot) => {
-            const balance = snapshot.val() || 0;
-            document.getElementById('balance').innerText = balance;
-        });
-    } else {
-        // Nếu chưa đăng nhập hoặc đã bấm "Rời vườn", hiện khung đăng nhập
-        document.getElementById('auth-box').style.display = 'block';
-        document.getElementById('game-lobby').style.display = 'none';
-    }
+   }
 });
 </div> 
 <!DOCTYPE html>

@@ -60,8 +60,6 @@
 const Pi = window.Pi;
 Pi.init({ version: "2.0", sandbox: true });
 
-// 2. Tự động nhận diện nghệ nhân (Phần đăng nhập cũ của mầy nè)
-auth.onAuthStateChanged((user) => {
     // 2. LỆNH GHI NHỚ: Tự động mở cửa vườn nếu đã đăng nhập từ trước
     auth.onAuthStateChanged((user) => {
         if (user) {

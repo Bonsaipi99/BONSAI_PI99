@@ -13,16 +13,24 @@
         #msg { margin-top: 15px; color: #ffeb3b; }
     </style>
 </head>
-<body>
-    <div class="box">
+<div id="auth-box" class="box">
         <h2>🌳 BONSAI PI 224</h2>
-        <input id="email" placeholder="Email">
+        <input id="email" placeholder="Email nghệ nhân">
         <input id="password" type="password" placeholder="Mật khẩu">
         <button onclick="login()">ĐĂNG NHẬP</button>
         <button style="background:none; color:#84bd00; border:1px solid #84bd00" onclick="register()">TẠO TÀI KHOẢN</button>
         <p id="msg"></p>
     </div>
 
+    <div id="game-lobby" style="display: none;">
+        <h2 style="color: #84bd00;">CHÀO MỪNG NGHỆ NHÂN!</h2>
+        <p>Tài khoản: <span id="user-email" style="color: gold; font-weight: bold;">...</span></p>
+        <div style="border: 2px solid #4a7c59; padding: 20px; border-radius: 15px; background: #25332e;">
+            <p>Số dư: <span id="balance" style="color: #84bd00; font-size: 1.5em; font-weight: bold;">0</span> PI</p>
+            <button onclick="napPi()" style="width: auto; padding: 10px 30px;">🎁 NẠP 10 PI CHĂM CÂY</button>
+        </div>
+        <button onclick="logout()" style="background: #f44336; margin-top: 20px; width: 150px;">ĐĂNG XUẤT</button>
+    </div>
 <script>
 const firebaseConfig = {
     apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",

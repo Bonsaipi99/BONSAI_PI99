@@ -11,7 +11,6 @@
         .box { background: #25332e; padding: 30px; border-radius: 15px; display: inline-block; border: 1px solid #4a7c59; }
         input { display: block; margin: 10px auto; padding: 10px; width: 250px; border-radius: 5px; border: none; }
         button { padding: 10px 20px; background: #84bd00; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
-        #msg { margin-top: 15px; color: #ffeb3b; }
     </style>
 </head>
 <body>
@@ -21,17 +20,16 @@
         <input id="password" type="password" placeholder="Mật khẩu">
         <button onclick="login()">ĐĂNG NHẬP</button>
         <button style="background:none; color:#84bd00; border:1px solid #84bd00" onclick="register()">TẠO TÀI KHOẢN</button>
-        <p id="msg"></p>
     </div>
 
     <div id="game-lobby" style="display: none;">
         <h2 style="color: #84bd00;">CHÀO MỪNG NGHỆ NHÂN!</h2>
-        <p>Tài khoản: <span id="user-email" style="color: gold; font-weight: bold;">...</span></p>
+        <p>Tài khoản: <span id="user-email" style="color: gold;">...</span></p>
         <div style="border: 2px solid #4a7c59; padding: 20px; border-radius: 15px; background: #25332e;">
-            <p>Số dư: <span id="balance" style="color: #84bd00; font-size: 1.5em; font-weight: bold;">0</span> PI</p>
-            <button onclick="napPi()" style="width: auto; padding: 10px 30px; background: gold; color: black;">🎁 NẠP 10 PI CHĂM CÂY</button>
+            <p>Số dư: <span id="balance">0</span> PI</p>
+            <button onclick="napPi()" style="background: gold; color: black;">🎁 NẠP 10 PI CHĂM CÂY</button>
         </div>
-        <button onclick="logout()" style="background: #f44336; margin-top: 20px; width: 150px;">ĐĂNG XUẤT</button>
+        <button onclick="logout()" style="background: #f44336; margin-top: 20px;">ĐĂNG XUẤT</button>
     </div>
 
 <script>
@@ -44,11 +42,9 @@ const firebaseConfig = {
     messagingSenderId: "818801429743",
     appId: "1:818801429743:web:27ed0c854b8be5c8a95f1a"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// TỰ ĐỘNG CHUYỂN TRANG
 auth.onAuthStateChanged((user) => {
     if (user) {
         document.getElementById("auth-box").style.display = "none";
@@ -78,20 +74,17 @@ async function napPi() {
     try {
         if (window.Pi && !window.Pi.initialized) { await Pi.init({ version: "2.0", sandbox: true }); }
         await Pi.createPayment({
-            amount: 10,
-            memo: "Nạp 10 Pi chăm vườn Bonsai 224",
-            metadata: { uid: auth.currentUser.uid }
+            amount: 10, memo: "Nạp 10 Pi", metadata: { uid: auth.currentUser.uid }
         }, {
-            onReadyForServerApproval: (id) => console.log("Đang duyệt..."),
+            onReadyForServerApproval: (id) => console.log("Duyệt..."),
             onReadyForServerCompletion: (id, txid) => {
-                let currentBal = parseFloat(document.getElementById("balance").innerText);
-                document.getElementById("balance").innerText = (currentBal + 10);
-                alert("✅ Nạp thành công 10 PI!");
+                let b = document.getElementById("balance");
+                b.innerText = parseFloat(b.innerText) + 10;
+                alert("Nạp xong!");
             },
-            onCancel: (id) => console.log("Hủy nạp"),
-            onError: (err) => alert("Lỗi: " + err.message)
+            onCancel: (id) => {}, onError: (err) => alert(err.message)
         });
-    } catch (e) { alert("Mở bằng Pi Browser trên đt mới nạp được mậy!"); }
+    } catch (e) { alert("Mở bằng Pi Browser trên đt nha!"); }
 }
 </script>
 </body>

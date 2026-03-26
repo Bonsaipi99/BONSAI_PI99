@@ -5,6 +5,7 @@
     <title>BONSAI PI 224</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { background: #1a2421; color: white; text-align: center; font-family: sans-serif; padding-top: 50px; }
         .box { background: #25332e; padding: 30px; border-radius: 15px; display: inline-block; border: 1px solid #4a7c59; }
@@ -13,23 +14,26 @@
         #msg { margin-top: 15px; color: #ffeb3b; }
     </style>
 </head>
-<div id="auth-box" class="box">
+<body>
+    <div id="auth-box" class="box">
         <h2>🌳 BONSAI PI 224</h2>
-        <input id="email" placeholder="email nghệ nhân">
+        <input id="email" placeholder="Email nghệ nhân">
         <input id="password" type="password" placeholder="Mật khẩu">
         <button onclick="login()">ĐĂNG NHẬP</button>
         <button style="background:none; color:#84bd00; border:1px solid #84bd00" onclick="register()">TẠO TÀI KHOẢN</button>
         <p id="msg"></p>
     </div>
+
     <div id="game-lobby" style="display: none;">
         <h2 style="color: #84bd00;">CHÀO MỪNG NGHỆ NHÂN!</h2>
         <p>Tài khoản: <span id="user-email" style="color: gold; font-weight: bold;">...</span></p>
         <div style="border: 2px solid #4a7c59; padding: 20px; border-radius: 15px; background: #25332e;">
             <p>Số dư: <span id="balance" style="color: #84bd00; font-size: 1.5em; font-weight: bold;">0</span> PI</p>
-            <button onclick="napPi()" style="width: auto; padding: 10px 30px;">🎁 NẠP 10 PI CHĂM CÂY</button>
+            <button onclick="napPi()" style="width: auto; padding: 10px 30px; background: gold; color: black;">🎁 NẠP 10 PI CHĂM CÂY</button>
         </div>
         <button onclick="logout()" style="background: #f44336; margin-top: 20px; width: 150px;">ĐĂNG XUẤT</button>
     </div>
+
 <script>
 const firebaseConfig = {
     apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",
@@ -40,67 +44,55 @@ const firebaseConfig = {
     messagingSenderId: "818801429743",
     appId: "1:818801429743:web:27ed0c854b8be5c8a95f1a"
 };
-// Khởi tạo Firebase
-if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    
-// --- TỰ ĐỘNG CHUYỂN VÀO SẢNH KHI ĐĂNG NHẬP XONG ---
+
+// TỰ ĐỘNG CHUYỂN TRANG
 auth.onAuthStateChanged((user) => {
-    const authBox = document.getElementById("auth-box");
-    const lobby = document.getElementById("game-lobby");
     if (user) {
-        authBox.style.display = "none";
-        lobby.style.display = "block";
+        document.getElementById("auth-box").style.display = "none";
+        document.getElementById("game-lobby").style.display = "block";
         document.getElementById("user-email").innerText = user.email;
     } else {
-        authBox.style.display = "inline-block";
-        lobby.style.display = "none";
+        document.getElementById("auth-box").style.display = "inline-block";
+        document.getElementById("game-lobby").style.display = "none";
     }
 });
-// Hàm Đăng nhập (Sửa chữ i chuẩn)
+
 function login() {
     const e = document.getElementById("email").value;
     const p = document.getElementById("password").value;
-    auth.signInWithEmailAndPassword(e, p)
-        .then(() => { console.log("Đã vào vườn!"); })
-        .catch(err => { alert("Lỗi: " + err.message); });
+    auth.signInWithEmailAndPassword(e, p).catch(err => alert("Lỗi: " + err.message));
 }
-// Hàm Đăng ký
+
 function register() {
     const e = document.getElementById("email").value;
     const p = document.getElementById("password").value;
-    auth.createUserWithEmailAndPassword(e, p)
-        .then(() => { alert("Tạo tài khoản thành công!"); })
-        .catch(err => { alert("Lỗi ĐK: " + err.message); });
+    auth.createUserWithEmailAndPassword(e, p).then(() => alert("Đã tạo acc!")).catch(err => alert(err.message));
 }
-// Hàm Đăng xuất
-function logout() {
-    auth.signOut().then(() => { location.reload(); });
-}
+
+function logout() { auth.signOut().then(() => location.reload()); }
+
 async function napPi() {
-    if (!auth.currentUser) return alert("Nghệ nhân chưa đăng nhập!");
     try {
-        if (window.Pi && !window.Pi.initialized) {
-            await Pi.init({ version: "2.0", sandbox: true }); 
-        }
-        const payment = await Pi.createPayment({
+        if (window.Pi && !window.Pi.initialized) { await Pi.init({ version: "2.0", sandbox: true }); }
+        await Pi.createPayment({
             amount: 10,
-            memo: "Nạp 10 Pi chăm sóc vườn Bonsai 224",
+            memo: "Nạp 10 Pi chăm vườn Bonsai 224",
             metadata: { uid: auth.currentUser.uid }
         }, {
-            onReadyForServerApproval: (id) => { console.log("Đang duyệt..."); },
+            onReadyForServerApproval: (id) => console.log("Đang duyệt..."),
             onReadyForServerCompletion: (id, txid) => {
                 let currentBal = parseFloat(document.getElementById("balance").innerText);
                 document.getElementById("balance").innerText = (currentBal + 10);
-                alert("✅ Tuyệt vời! Đã nạp thành công 10 PI!");
+                alert("✅ Nạp thành công 10 PI!");
             },
-            onCancel: (id) => { console.log("Nhi đã hủy"); },
-            onError: (err) => { alert("Lỗi nạp: " + err.message); }
+            onCancel: (id) => console.log("Hủy nạp"),
+            onError: (err) => alert("Lỗi: " + err.message)
         });
-    } catch (e) {
-        alert("Nhi ơi, mầy phải mở bằng Pi Browser trên điện thoại mới nạp được nha!");
-    }
+    } catch (e) { alert("Mở bằng Pi Browser trên đt mới nạp được mậy!"); }
 }
 </script>
+</body>
 </html>

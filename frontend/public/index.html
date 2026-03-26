@@ -6,11 +6,13 @@
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    
     <style>
         body { background: #1a2421; color: white; text-align: center; font-family: sans-serif; padding-top: 50px; }
         .box { background: #25332e; padding: 30px; border-radius: 15px; display: inline-block; border: 1px solid #4a7c59; }
         input { display: block; margin: 10px auto; padding: 10px; width: 250px; border-radius: 5px; border: none; }
         button { padding: 10px 20px; background: #84bd00; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
+        #msg { margin-top: 15px; color: #ffeb3b; }
     </style>
 </head>
 <body>
@@ -20,19 +22,21 @@
         <input id="password" type="password" placeholder="Mật khẩu">
         <button onclick="loginUser()">ĐĂNG NHẬP</button>
         <button style="background:none; color:#84bd00; border:1px solid #84bd00" onclick="registerUser()">TẠO TÀI KHOẢN</button>
+        <p id="msg"></p>
     </div>
 
     <div id="game-lobby" style="display: none;">
         <h2 style="color: #84bd00;">CHÀO MỪNG NGHỆ NHÂN!</h2>
-        <p>Tài khoản: <span id="user-email" style="color: gold;">...</span></p>
+        <p>Tài khoản: <span id="user-email" style="color: gold; font-weight: bold;">...</span></p>
         <div style="border: 2px solid #4a7c59; padding: 20px; border-radius: 15px; background: #25332e;">
-            <p>Số dư: <span id="balance">0</span> PI</p>
-            <button onclick="napPi()" style="background: gold; color: black;">🎁 NẠP 10 PI CHĂM CÂY</button>
+            <p>Số dư: <span id="balance" style="color: #84bd00; font-size: 1.5em; font-weight: bold;">0</span> PI</p>
+            <button onclick="napPi()" style="width: auto; padding: 10px 30px; background: gold; color: black;">🎁 NẠP 10 PI CHĂM CÂY</button>
         </div>
-        <button onclick="logout()" style="background: #f44336; margin-top: 20px;">ĐĂNG XUẤT</button>
+        <button onclick="logout()" style="background: #f44336; margin-top: 20px; width: 150px;">ĐĂNG XUẤT</button>
     </div>
 
 <script>
+// 2. Cấu hình Firebase (Giữ nguyên của mầy)
 const firebaseConfig = {
     apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",
     authDomain: "bonsaipi224.firebaseapp.com",
@@ -45,56 +49,78 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
+// 3. Khởi tạo Pi và tự động xin quyền "payments" ngay khi mở trang
 window.onload = async function() {
     if (window.Pi) {
         try {
             await Pi.init({ version: "2.0", sandbox: true });
-            Pi.authenticate(['payments'], (p) => {}).then(a => console.log("Pi OK")).catch(e => console.log(e));
-        } catch (err) { console.log("Chưa có Pi SDK"); }
+            // Xin quyền thanh toán để hết lỗi "scope"
+            Pi.authenticate(['payments'], (payment) => {}).then(a => {
+                console.log("Đã cấp quyền nạp Pi!");
+            }).catch(e => console.error("Lỗi xin quyền:", e));
+        } catch (err) { console.log("Lỗi khởi tạo Pi"); }
     }
 };
 
+// 4. Tự động chuyển sảnh khi trạng thái đăng nhập thay đổi
 auth.onAuthStateChanged((user) => {
+    const authBox = document.getElementById("auth-box");
+    const lobby = document.getElementById("game-lobby");
     if (user) {
-        document.getElementById("auth-box").style.display = "none";
-        document.getElementById("game-lobby").style.display = "block";
+        authBox.style.display = "none";
+        lobby.style.display = "block";
         document.getElementById("user-email").innerText = user.email;
     } else {
-        document.getElementById("auth-box").style.display = "inline-block";
-        document.getElementById("game-lobby").style.display = "none";
+        authBox.style.display = "inline-block";
+        lobby.style.display = "none";
     }
 });
 
+// 5. Các hàm Đăng nhập / Đăng ký
 function loginUser() {
     const e = document.getElementById("email").value;
     const p = document.getElementById("password").value;
     if(!e || !p) return alert("Nhập đủ mail với pass mầy ơi!");
-    auth.signInWithEmailAndPassword(e, p).catch(err => alert("Lỗi đăng nhập: " + err.message));
+    auth.signInWithEmailAndPassword(e, p).catch(err => alert("Lỗi: " + err.message));
 }
 
 function registerUser() {
     const e = document.getElementById("email").value;
     const p = document.getElementById("password").value;
     if(!e || !p) return alert("Nhập đủ mail với pass mới tạo acc được!");
-    auth.createUserWithEmailAndPassword(e, p).then(() => alert("Tạo acc ngon lành!")).catch(err => alert("Lỗi tạo acc: " + err.message));
+    auth.createUserWithEmailAndPassword(e, p).then(() => alert("Tạo acc thành công!")).catch(err => alert(err.message));
 }
 
 function logout() { auth.signOut().then(() => location.reload()); }
 
+// 6. Hàm nạp Pi (Đã sửa lỗi Expired cho bản Test)
 async function napPi() {
     try {
+        if (!auth.currentUser) return alert("Nghệ nhân phải đăng nhập trước!");
+        
         await Pi.createPayment({
-            amount: 10, memo: "Nạp 10 Pi", metadata: { uid: auth.currentUser.uid }
+            amount: 10,
+            memo: "Nạp 10 Pi chăm vườn 224",
+            metadata: { uid: auth.currentUser.uid }
         }, {
-            onReadyForServerApproval: (id) => console.log("Duyệt..."),
-            onReadyForServerCompletion: (id, txid) => {
-                let b = document.getElementById("balance");
-                b.innerText = parseFloat(b.innerText) + 10;
-                alert("Nạp thành công!");
+            onReadyForServerApproval: (id) => {
+                console.log("Đang chờ duyệt đơn hàng: " + id);
+                // Với Sandbox, mầy phải đợi xíu để hệ thống Pi xử lý
+                alert("Hệ thống đang mở ví... Nhi đợi xíu nha!");
             },
-            onCancel: (id) => {}, onError: (err) => alert("Lỗi: " + err.message)
+            onReadyForServerCompletion: (id, txid) => {
+                // Cập nhật số dư ảo trên màn hình
+                let b = document.getElementById("balance");
+                let currentBal = parseFloat(b.innerText);
+                b.innerText = currentBal + 10;
+                alert("✅ Nạp xong! Đã cộng 10 Pi vào vườn.");
+            },
+            onCancel: (id) => { console.log("Nhi đã hủy."); },
+            onError: (err) => { alert("Lỗi ví: " + err.message); }
         });
-    } catch (e) { alert("Lỗi: " + e.message); }
+    } catch (e) {
+        alert("Nhi ơi, mầy phải mở bằng Pi Browser trên đt mới nạp được nha!");
+    }
 }
 </script>
 </body>

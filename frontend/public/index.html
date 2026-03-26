@@ -46,7 +46,8 @@ const firebaseConfig = {
 // Khởi tạo Firebase
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const auth = firebase.auth();
-
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    
 // --- TỰ ĐỘNG CHUYỂN VÀO SẢNH KHI ĐĂNG NHẬP XONG ---
 auth.onAuthStateChanged((user) => {
     const authBox = document.getElementById("auth-box");
@@ -84,9 +85,31 @@ function logout() {
     auth.signOut().then(() => { location.reload(); });
 }
 
-// Hàm Nạp Pi (Để tạm chờ mầy dán code thật)
 async function napPi() {
-    alert("Đang kết nối ví Pi để nạp 10 PI...");
+    if (!auth.currentUser) return alert("Nghệ nhân chưa đăng nhập!");
+
+    try {
+        if (window.Pi && !window.Pi.initialized) {
+            await Pi.init({ version: "2.0", sandbox: true }); 
+        }
+
+        const payment = await Pi.createPayment({
+            amount: 10,
+            memo: "Nạp 10 Pi chăm sóc vườn Bonsai 224",
+            metadata: { uid: auth.currentUser.uid }
+        }, {
+            onReadyForServerApproval: (id) => { console.log("Đang duyệt..."); },
+            onReadyForServerCompletion: (id, txid) => {
+                let currentBal = parseFloat(document.getElementById("balance").innerText);
+                document.getElementById("balance").innerText = (currentBal + 10);
+                alert("✅ Tuyệt vời! Đã nạp thành công 10 PI!");
+            },
+            onCancel: (id) => { console.log("Nhi đã hủy"); },
+            onError: (err) => { alert("Lỗi nạp: " + err.message); }
+        });
+    } catch (e) {
+        alert("Nhi ơi, mầy phải mở bằng Pi Browser trên điện thoại mới nạp được nha!");
+    }
 }
 </script>
 </html>

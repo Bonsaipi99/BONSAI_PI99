@@ -16,10 +16,10 @@
 <body>
     <div id="auth-box" class="box">
         <h2>🌳 BONSAI PI 224</h2>
-        <input id="email" placeholder="Email nghệ nhân">
+        <input id="email" type="email" placeholder="Email nghệ nhân">
         <input id="password" type="password" placeholder="Mật khẩu">
-        <button onclick="login()">ĐĂNG NHẬP</button>
-        <button style="background:none; color:#84bd00; border:1px solid #84bd00" onclick="register()">TẠO TÀI KHOẢN</button>
+        <button onclick="loginUser()">ĐĂNG NHẬP</button>
+        <button style="background:none; color:#84bd00; border:1px solid #84bd00" onclick="registerUser()">TẠO TÀI KHOẢN</button>
     </div>
 
     <div id="game-lobby" style="display: none;">
@@ -33,7 +33,6 @@
     </div>
 
 <script>
-// 1. Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",
     authDomain: "bonsaipi224.firebaseapp.com",
@@ -46,18 +45,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// 2. Khởi tạo Pi và xin quyền "payments"
 window.onload = async function() {
     if (window.Pi) {
-        await Pi.init({ version: "2.0", sandbox: true });
-        // Bước quan trọng: Xin quyền thanh toán để hết lỗi "scope"
-        const scopes = ['payments'];
-        const onIncompletePaymentFound = (payment) => { console.log("Payment tồn đọng:", payment); };
-        Pi.authenticate(scopes, onIncompletePaymentFound).then(function(auth) {
-            console.log("Đã cấp quyền nạp Pi!");
-        }).catch(function(error) {
-            console.error(error);
-        });
+        try {
+            await Pi.init({ version: "2.0", sandbox: true });
+            Pi.authenticate(['payments'], (p) => {}).then(a => console.log("Pi OK")).catch(e => console.log(e));
+        } catch (err) { console.log("Chưa có Pi SDK"); }
     }
 };
 
@@ -67,3 +60,42 @@ auth.onAuthStateChanged((user) => {
         document.getElementById("game-lobby").style.display = "block";
         document.getElementById("user-email").innerText = user.email;
     } else {
+        document.getElementById("auth-box").style.display = "inline-block";
+        document.getElementById("game-lobby").style.display = "none";
+    }
+});
+
+function loginUser() {
+    const e = document.getElementById("email").value;
+    const p = document.getElementById("password").value;
+    if(!e || !p) return alert("Nhập đủ mail với pass mầy ơi!");
+    auth.signInWithEmailAndPassword(e, p).catch(err => alert("Lỗi đăng nhập: " + err.message));
+}
+
+function registerUser() {
+    const e = document.getElementById("email").value;
+    const p = document.getElementById("password").value;
+    if(!e || !p) return alert("Nhập đủ mail với pass mới tạo acc được!");
+    auth.createUserWithEmailAndPassword(e, p).then(() => alert("Tạo acc ngon lành!")).catch(err => alert("Lỗi tạo acc: " + err.message));
+}
+
+function logout() { auth.signOut().then(() => location.reload()); }
+
+async function napPi() {
+    try {
+        await Pi.createPayment({
+            amount: 10, memo: "Nạp 10 Pi", metadata: { uid: auth.currentUser.uid }
+        }, {
+            onReadyForServerApproval: (id) => console.log("Duyệt..."),
+            onReadyForServerCompletion: (id, txid) => {
+                let b = document.getElementById("balance");
+                b.innerText = parseFloat(b.innerText) + 10;
+                alert("Nạp thành công!");
+            },
+            onCancel: (id) => {}, onError: (err) => alert("Lỗi: " + err.message)
+        });
+    } catch (e) { alert("Lỗi: " + e.message); }
+}
+</script>
+</body>
+</html>

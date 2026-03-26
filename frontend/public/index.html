@@ -1,87 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Bonsai Login</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-
-  <style>
-    body {
-      background: #111;
-      color: white;
-      text-align: center;
-      padding-top: 50px;
-    }
-    input {
-      display: block;
-      margin: 10px auto;
-      padding: 10px;
-    }
-    button {
-      padding: 10px;
-      margin: 5px;
-    }
-  </style>
-</head>
-
-<body>
-
-<h2>BONSAI LOGIN</h2>
-
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-
-<button onclick="register()">Đăng ký</button>
-<button onclick="login()">Đăng nhập</button>
-
-<p id="msg"></p>
-
 <script>
-  // ✅ CONFIG PHẢI ĐỂ TRÊN
-  const firebaseConfig = {
-    apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",
-    authDomain: "bonsaipi224.firebaseapp.com",
-    databaseURL: "https://bonsaipi224-default-rtdb.firebaseio.com",
-    projectId: "bonsaipi224",
-    storageBucket: "bonsaipi224.firebasestorage.app",
-    messagingSenderId: "818801429743",
-    appId: "1:818801429743:web:27ed0c854b8be5c8a95f1a"
-  };
+// 1. Cấu hình Firebase của Nhi (Phải đặt lên đầu)
+const firebaseConfig = {
+  apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",
+  authDomain: "bonsaipi224.firebaseapp.com",
+  databaseURL: "https://bonsaipi224-default-rtdb.firebaseio.com",
+  projectId: "bonsaipi224",
+  storageBucket: "bonsaipi224.firebasestorage.app",
+  messagingSenderId: "818801429743",
+  appId: "1:818801429743:web:27ed0c854b8be5c8a95f1a"
+};
 
-  // ✅ INIT ĐÚNG (QUAN TRỌNG)
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
+// 2. Khởi tạo Firebase (Chỉ làm 1 lần duy nhất)
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const auth = firebase.auth();
+console.log("Firebase đã sẵn sàng!");
 
-  console.log("Firebase OK");
+// 3. Hàm Đăng ký
+function register() {
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
 
-  function register() {
-    const email = document.getElementById("email").value;
-    const pass = document.getElementById("password").value;
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(() => {
+      document.getElementById("msg").innerText = "Đăng ký thành công!";
+    })
+    .catch(err => {
+      document.getElementById("msg").innerText = "Lỗi ĐK: " + err.message;
+    });
+}
 
-    auth.createUserWithEmailAndPassword(email, pass)
-      .then(() => {
-        document.getElementById("msg").innerText = "Đăng ký thành công";
-      })
-      .catch(err => {
-        document.getElementById("msg").innerText = err.message;
-        console.error(err);
-      });
-  }
+// 4. Hàm Đăng nhập
+function login() {
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
 
-  function login() {
-    const email = document.getElementById("email").value;
-    const pass = document.getElementById("password").value;
-
-    auth.signInWithEmailAndPassword(email, pass)
-      .then(() => {
-        document.getElementById("msg").innerText = "Đăng nhập OK";
-      })
-      .catch(err => {
-        document.getElementById("msg").innerText = err.message;
-        console.error(err);
-      });
-  }
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(() => {
+      document.getElementById("msg").innerText = "Đăng nhập OK rồi Nhi ơi!";
+      // Chỗ này mầy có thể thêm lệnh chuyển trang nếu muốn
+    })
+    .catch(err => {
+      document.getElementById("msg").innerText = "Lỗi ĐN: " + err.message;
+    });
+}
 </script>
-
-</body>
-</html>

@@ -31,6 +31,7 @@
         </div>
         <button onclick="logout()" style="background: #f44336; margin-top: 20px; width: 150px;">ĐĂNG XUẤT</button>
     </div>
+
 <script>
 const firebaseConfig = {
     apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",
@@ -45,21 +46,39 @@ const firebaseConfig = {
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const auth = firebase.auth();
 
+// --- ĐỘNG CƠ TỰ ĐỘNG MỞ CỬA VÀO VƯỜN ---
+auth.onAuthStateChanged((user) => {
+    const authBox = document.getElementById("auth-box");
+    const lobby = document.getElementById("game-lobby");
+    
+    if (user) {
+        authBox.style.display = "none";
+        lobby.style.display = "block";
+        document.getElementById("user-email").innerText = user.email;
+    } else {
+        authBox.style.display = "inline-block";
+        lobby.style.display = "none";
+    }
+});
+
 function login() {
     const e = document.getElementById("email").value;
     const p = document.getElementById("password").value;
-    auth.signInWithEmailAndPassword(e, p)
-        .then(() => { document.getElementById("msg").innerText = "Đăng nhập thành công!"; })
-        .catch(err => { document.getElementById("msg").innerText = "Lỗi: " + err.message; });
+    auth.signInWithEmailAndPassword(e, p).catch(err => alert("Lỗi: " + err.message));
 }
 
 function register() {
     const e = document.getElementById("email").value;
     const p = document.getElementById("password").value;
-    auth.createUserWithEmailAndPassword(e, p)
-        .then(() => { document.getElementById("msg").innerText = "Đã tạo tài khoản!"; })
-        .catch(err => { document.getElementById("msg").innerText = "Lỗi ĐK: " + err.message; });
+    auth.createUserWithEmailAndPassword(e, p).then(() => alert("Đã tạo acc!")).catch(err => alert(err.message));
 }
-</script>
-</body>
+
+function logout() {
+    auth.signOut().then(() => location.reload());
+}
+
+async function napPi() {
+    alert("Đang kết nối ví Pi... Tính năng nạp tiền sẽ hiện ở đây!");
+    // Đoạn này mầy dán code Pi SDK hôm bữa tao chỉ vô là mướt!
+}
 </html>

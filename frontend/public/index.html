@@ -11,7 +11,7 @@
     <style>
         body { background: #1a2421; color: white; text-align: center; font-family: sans-serif; padding-top: 50px; }
         .box { background: #25332e; padding: 30px; border-radius: 15px; display: inline-block; border: 1px solid #4a7c59; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        input { display: block; margin: 10px auto; padding: 12px; width: 260px; border-radius: 8px; border: none; outline: none; }
+        input { display: block; margin: 10px auto; padding: 12px; width: 260px; border-radius: 8px; border: none; outline: none; color: black; }
         button { padding: 12px 20px; background: #84bd00; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; color: white; }
         .status-card { border: 2px solid #4a7c59; padding: 20px; border-radius: 15px; background: #1e2b26; margin-top: 15px; }
         #msg { color: #ffeb3b; margin-top: 15px; font-size: 0.9em; }
@@ -25,22 +25,21 @@
         <input id="password" type="password" placeholder="Mật khẩu">
         <button onclick="loginUser()">ĐĂNG NHẬP</button>
         <button style="background:none; color:#84bd00; border:1px solid #84bd00" onclick="registerUser()">TẠO TÀI KHOẢN</button>
-        <p id="msg">Đăng nhập đi Nhi ơi!</p>
+        <p id="msg">Đăng nhập để vào vườn nạp Pi!</p>
     </div>
 
     <div id="game-lobby" style="display: none;" class="box">
-        <h2 style="color: #84bd00;">CHÀO MỪNG NGHỆ NHÂN!</h2>
+        <h2 style="color: #84bd00;">CHÀO MÈO NHI!</h2>
         <p>Tài khoản: <span id="user-email" style="color: gold; font-weight: bold;">...</span></p>
         <div class="status-card">
-            <p>Số dư hiện tại:</p>
-            <p><span id="balance" style="color: #84bd00; font-size: 2em; font-weight: bold;">0</span> <span style="color:gold">PI</span></p>
-            <button onclick="napPi()" style="background: gold; color: black; font-size: 1.1em;">🎁 NẠP 10 PI CHĂM VƯỜN</button>
+            <p>Số dư: <span id="balance" style="color: #84bd00; font-size: 1.5em; font-weight: bold;">0</span> <span style="color:gold">PI</span></p>
+            <button onclick="napPi()" style="background: gold; color: black; font-size: 1.1em;">🎁 NẠP 10 PI TEST</button>
         </div>
-        <button onclick="logout()" style="background: #f44336; margin-top: 25px; width: 150px;">ĐĂNG XUẤT</button>
+        <button onclick="logout()" style="background: #f44336; margin-top: 25px; width: 120px;">THOÁT</button>
     </div>
 
 <script>
-// 1. Cấu hình Firebase của mầy
+// 1. Cấu hình Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",
     authDomain: "bonsaipi224.firebaseapp.com",
@@ -53,71 +52,71 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// 2. Khởi tạo Pi ngay khi load trang
+// 2. Khởi tạo Pi thầm lặng khi vừa mở trang
 window.onload = function() {
     if (window.Pi) {
-        Pi.init({ version: "2.0", sandbox: true });
-        console.log("Pi SDK OK!");
+        Pi.init({ version: "2.0", sandbox: true }); 
+        console.log("SDK OK");
     }
 };
 
-// 3. Quản lý trạng thái đăng nhập
+// 3. Tự động chuyển màn hình khi đăng nhập
 auth.onAuthStateChanged((user) => {
-    const authBox = document.getElementById("auth-box");
-    const lobby = document.getElementById("game-lobby");
     if (user) {
-        authBox.style.display = "none"; lobby.style.display = "block";
+        document.getElementById("auth-box").style.display = "none";
+        document.getElementById("game-lobby").style.display = "block";
         document.getElementById("user-email").innerText = user.email;
     } else {
-        authBox.style.display = "inline-block"; lobby.style.display = "none";
+        document.getElementById("auth-box").style.display = "inline-block";
+        document.getElementById("game-lobby").style.display = "none";
     }
 });
 
+// 4. Các hàm Firebase
 function loginUser() {
     const e = document.getElementById("email").value;
     const p = document.getElementById("password").value;
     auth.signInWithEmailAndPassword(e, p).catch(err => alert("Lỗi: " + err.message));
 }
-
 function registerUser() {
     const e = document.getElementById("email").value;
     const p = document.getElementById("password").value;
-    auth.createUserWithEmailAndPassword(e, p).then(() => alert("Tạo xong!")).catch(err => alert(err.message));
+    auth.createUserWithEmailAndPassword(e, p).then(() => alert("Xong!")).catch(err => alert(err.message));
 }
-
 function logout() { auth.signOut().then(() => location.reload()); }
 
-// 4. Hàm nạp Pi mới - Cực gọn để không bị "quay"
+// 5. Hàm Nạp Pi (Đã sửa lỗi quay chóng mặt)
 async function napPi() {
     if (!window.Pi) return alert("Mở bằng Pi Browser nha Nhi!");
     
     try {
-        // Gọi authenticate thầm lặng để lấy quyền payments
-        const authResult = await Pi.authenticate(['payments'], (p) => {});
-        
-        // Gọi thẳng lệnh tạo thanh toán
+        // BƯỚC 1: XÁC THỰC NGƯỜI DÙNG TRƯỚC
+        const authResult = await Pi.authenticate(['payments'], (p) => {
+            console.log("Xử lý đơn kẹt...");
+        });
+
+        // BƯỚC 2: GỌI VÍ TÍM HIỆN LÊN
         const payment = await Pi.createPayment({
             amount: 10,
             memo: "Nạp 10 Pi cho vườn Bonsai 224",
             metadata: { uid: auth.currentUser.uid }
         }, {
-            onReadyForServerApproval: (id) => { console.log("Payment ID: " + id); },
+            onReadyForServerApproval: (id) => { console.log("ID đơn: " + id); },
             onReadyForServerCompletion: (id, txid) => {
-                let b = document.getElementById("balance");
-                b.innerText = parseFloat(b.innerText) + 10;
-                alert("✅ Nạp thành công rồi mầy ơi!");
+                document.getElementById("balance").innerText = "10";
+                alert("✅ Thành công!");
             },
-            onCancel: (id) => { console.log("Hủy nạp."); },
+            onCancel: (id) => { console.log("Hủy."); },
             onError: (err) => { 
                 if(err.message.includes("Expired")) {
-                    alert("Ví hiện lên là code đúng rồi đó, lỗi hết hạn là do chưa có Backend thôi!");
+                    alert("Ví hiện lên là code chuẩn rồi, nạp thật cần Server Backend mới không bị hết hạn!");
                 } else {
                     alert("Lỗi: " + err.message);
                 }
             }
         });
     } catch (e) {
-        alert("Nhi ơi, ví đang kẹt: " + e.message);
+        alert("Ví kẹt hoặc chưa đăng nhập ví: " + e.message);
     }
 }
 </script>

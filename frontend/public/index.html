@@ -43,14 +43,14 @@ const firebaseConfig = {
     appId: "1:818801429743:web:27ed0c854b8be5c8a95f1a"
 };
 
+// Khởi tạo Firebase
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const auth = firebase.auth();
 
-// --- ĐỘNG CƠ TỰ ĐỘNG MỞ CỬA VÀO VƯỜN ---
+// --- TỰ ĐỘNG CHUYỂN VÀO SẢNH KHI ĐĂNG NHẬP XONG ---
 auth.onAuthStateChanged((user) => {
     const authBox = document.getElementById("auth-box");
     const lobby = document.getElementById("game-lobby");
-    
     if (user) {
         authBox.style.display = "none";
         lobby.style.display = "block";
@@ -61,24 +61,32 @@ auth.onAuthStateChanged((user) => {
     }
 });
 
+// Hàm Đăng nhập (Sửa chữ i chuẩn)
 function login() {
     const e = document.getElementById("email").value;
     const p = document.getElementById("password").value;
-    auth.signInWithEmailAndPassword(e, p).catch(err => alert("Lỗi: " + err.message));
+    auth.signInWithEmailAndPassword(e, p)
+        .then(() => { console.log("Đã vào vườn!"); })
+        .catch(err => { alert("Lỗi: " + err.message); });
 }
 
+// Hàm Đăng ký
 function register() {
     const e = document.getElementById("email").value;
     const p = document.getElementById("password").value;
-    auth.createUserWithEmailAndPassword(e, p).then(() => alert("Đã tạo acc!")).catch(err => alert(err.message));
+    auth.createUserWithEmailAndPassword(e, p)
+        .then(() => { alert("Tạo tài khoản thành công!"); })
+        .catch(err => { alert("Lỗi ĐK: " + err.message); });
 }
 
+// Hàm Đăng xuất
 function logout() {
-    auth.signOut().then(() => location.reload());
+    auth.signOut().then(() => { location.reload(); });
 }
 
+// Hàm Nạp Pi (Để tạm chờ mầy dán code thật)
 async function napPi() {
-    alert("Đang kết nối ví Pi... Tính năng nạp tiền sẽ hiện ở đây!");
-    // Đoạn này mầy dán code Pi SDK hôm bữa tao chỉ vô là mướt!
+    alert("Đang kết nối ví Pi để nạp 10 PI...");
 }
+</script>
 </html>

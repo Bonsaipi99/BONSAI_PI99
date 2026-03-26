@@ -1,245 +1,57 @@
 <!DOCTYPE html>
-
-<html lang="vi">
-
+<html>
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>BONSAI PI 224 - LOGIN</title>
-
+    <title>BONSAI PI 224</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-
-
-
     <style>
-
-        body {
-
-            background-color: #1a2421; /* Màu xanh đen rừng rậm */
-
-            color: #e0e0e0;
-
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-            display: flex;
-
-            justify-content: center;
-
-            align-items: center;
-
-            height: 100vh;
-
-            margin: 0;
-
-        }
-
-        .login-card {
-
-            background: #25332e;
-
-            padding: 30px;
-
-            border-radius: 15px;
-
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-
-            width: 320px;
-
-            border: 1px solid #4a7c59;
-
-            text-align: center;
-
-        }
-
-        h2 { color: #84bd00; margin-bottom: 20px; text-transform: uppercase; }
-
-        input {
-
-            width: 100%;
-
-            padding: 12px;
-
-            margin: 10px 0;
-
-            border-radius: 8px;
-
-            border: 1px solid #3d5a45;
-
-            background: #1a2421;
-
-            color: white;
-
-            box-sizing: border-box;
-
-        }
-
-        button {
-
-            width: 100%;
-
-            padding: 12px;
-
-            margin-top: 10px;
-
-            border: none;
-
-            border-radius: 8px;
-
-            cursor: pointer;
-
-            font-weight: bold;
-
-            transition: 0.3s;
-
-        }
-
-        .btn-login { background-color: #84bd00; color: #1a2421; }
-
-        .btn-login:hover { background-color: #a3d600; }
-
-        .btn-reg { background-color: transparent; color: #84bd00; border: 1px solid #84bd00; }
-
-        #msg { margin-top: 15px; font-size: 0.9em; color: #ffeb3b; }
-
+        body { background: #1a2421; color: white; text-align: center; font-family: sans-serif; padding-top: 50px; }
+        .box { background: #25332e; padding: 30px; border-radius: 15px; display: inline-block; border: 1px solid #4a7c59; }
+        input { display: block; margin: 10px auto; padding: 10px; width: 250px; border-radius: 5px; border: none; }
+        button { padding: 10px 20px; background: #84bd00; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
+        #msg { margin-top: 15px; color: #ffeb3b; }
     </style>
-
 </head>
-
 <body>
-
-
-
-<div class="login-card">
-
-    <h2>🌳 Bonsai Pi 224</h2>
-
-    <input id="email" type="email" placeholder="Email của nghệ nhân">
-
-    <input id="password" type="password" placeholder="Mật khẩu">
-
-    
-
-    <button class="btn-login" onclick="login()">ĐĂNG NHẬP</button>
-
-    <button class="btn-reg" onclick="register()">TẠO TÀI KHOẢN MỚI</button>
-
-
-
-    <p id="msg"></p>
-
-</div>
-
-
+    <div class="box">
+        <h2>🌳 BONSAI PI 224</h2>
+        <input id="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Mật khẩu">
+        <button onclick="login()">ĐĂNG NHẬP</button>
+        <button style="background:none; color:#84bd00; border:1px solid #84bd00" onclick="register()">TẠO TÀI KHOẢN</button>
+        <p id="msg"></p>
+    </div>
 
 <script>
-
-// 1. Cấu hình Firebase của Nhi
-
 const firebaseConfig = {
-
     apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",
-
     authDomain: "bonsaipi224.firebaseapp.com",
-
     databaseURL: "https://bonsaipi224-default-rtdb.firebaseio.com",
-
     projectId: "bonsaipi224",
-
     storageBucket: "bonsaipi224.firebasestorage.app",
-
     messagingSenderId: "818801429743",
-
     appId: "1:818801429743:web:27ed0c854b8be5c8a95f1a"
-
 };
 
-
-
-// 2. Khởi tạo
-
-firebase.initializeApp(firebaseConfig);
-
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const auth = firebase.auth();
 
-
-
-// 3. Hàm Đăng nhập
-
 function login() {
-
-    const email = document.getElementById("email").value;
-
-    const pass = document.getElementById("password").value;
-
-    const msg = document.getElementById("msg");
-
-
-
-    if(!email || !pass) { msg.innerText = "kzvi6npd3ils0ho0xyqs2otg8bcfotam9bgnqkoeatwxibb69vvlwdj8ehsf9d1e; }
-
-
-
-    auth.signInWithEmailAndPassword(email, pass)
-
-        .then((user) => {
-
-            msg.style.color = "#84bd00";
-
-            msg.innerText = "Đăng nhập OK! Đang vào vườn...";
-
-            // Sau này mầy muốn chuyển trang thì thêm lệnh ở đây
-
-        })
-
-        .catch(err => {
-
-            msg.style.color = "#f44336";
-
-            msg.innerText = "Lỗi: " + err.message;
-
-        });
-
+    const e = document.getElementById("email").value;
+    const p = document.getElementById("password").value;
+    auth.signInWithEmailAndPassword(e, p)
+        .then(() => { document.getElementById("msg").innerText = "Đăng nhập thành công!"; })
+        .catch(err => { document.getElementById("msg").innerText = "Lỗi: " + err.message; });
 }
-
-
-
-// 4. Hàm Đăng ký
 
 function register() {
-
-    const email = document.getElementById("email").value;
-
-    const pass = document.getElementById("password").value;
-
-    const msg = document.getElementById("msg");
-
-
-
-    auth.createUserWithEmailAndPassword(email, pass)
-
-        .then(() => {
-
-            msg.innerText = "Đã tạo tài khoản thành công!";
-
-        })
-
-        .catch(err => {
-
-            msg.innerText = "Lỗi tạo acc: " + err.message;
-
-        });
-
+    const e = document.getElementById("email").value;
+    const p = document.getElementById("password").value;
+    auth.createUserWithEmailAndPassword(e, p)
+        .then(() => { document.getElementById("msg").innerText = "Đã tạo tài khoản!"; })
+        .catch(err => { document.getElementById("msg").innerText = "Lỗi ĐK: " + err.message; });
 }
-
 </script>
-
-
-
 </body>
-
 </html>

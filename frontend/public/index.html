@@ -1,5 +1,5 @@
 <script>
-// 1. Cấu hình Firebase của Nhi (Phải đặt lên đầu)
+// 1. Cấu hình Firebase (Phải để TRƯỚC khi gọi lệnh khởi tạo)
 const firebaseConfig = {
   apiKey: "AIzaSyA2P3yh0o-Jr2zCDkFxBg4YTrFSTpeS8P0",
   authDomain: "bonsaipi224.firebaseapp.com",
@@ -10,21 +10,22 @@ const firebaseConfig = {
   appId: "1:818801429743:web:27ed0c854b8be5c8a95f1a"
 };
 
-// 2. Khởi tạo Firebase (Chỉ làm 1 lần duy nhất)
+// 2. Khởi tạo (Cách viết chuẩn cho bản 8.10.0 của mầy)
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const auth = firebase.auth();
-console.log("Firebase đã sẵn sàng!");
 
 // 3. Hàm Đăng ký
 function register() {
   const email = document.getElementById("email").value;
   const pass = document.getElementById("password").value;
+  
+  if (!email || !pass) return alert("Nhi ơi, nhập đủ email với mật khẩu đã!");
 
   auth.createUserWithEmailAndPassword(email, pass)
     .then(() => {
-      document.getElementById("msg").innerText = "Đăng ký thành công!";
+      document.getElementById("msg").innerText = "Đăng ký thành công rồi mậy!";
     })
     .catch(err => {
       document.getElementById("msg").innerText = "Lỗi ĐK: " + err.message;
@@ -38,8 +39,7 @@ function login() {
 
   auth.signInWithEmailAndPassword(email, pass)
     .then(() => {
-      document.getElementById("msg").innerText = "Đăng nhập OK rồi Nhi ơi!";
-      // Chỗ này mầy có thể thêm lệnh chuyển trang nếu muốn
+      document.getElementById("msg").innerText = "Đăng nhập OK! Vào vườn thôi!";
     })
     .catch(err => {
       document.getElementById("msg").innerText = "Lỗi ĐN: " + err.message;
